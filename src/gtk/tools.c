@@ -27,32 +27,6 @@ typedef struct UserInterface
     GtkButton *web;
 }UserInterface;
 
-typedef struct Create_sudoku
-{
-    char *file;
-    int posx;
-    int posy;
-    int grid[81];
-    int gridx;
-    int gridy;
-    SDL_Surface* surface;
-    GtkWindow *win;
-    GtkImage* img;
-    GtkButton *new;
-    GtkButton *back;
-    GtkButton *add;
-    GtkButton *_0;
-    GtkButton *_1;
-    GtkButton *_2;
-    GtkButton *_3;
-    GtkButton *_4;
-    GtkButton *_5;
-    GtkButton *_6;
-    GtkButton *_7;
-    GtkButton *_8;
-    GtkButton *_9;
-}cre_sud;
-
 typedef struct Image
 {
     GtkImage *img;
@@ -236,5 +210,3 @@ void on_save(GtkButton *button, gpointer user_data)
         gtk_widget_destroy(dialog);
     }
 }
-
-
