@@ -1,4 +1,5 @@
-# Makefile
+#
+#Makefile
 
 CC = gcc
 
@@ -10,7 +11,7 @@ EXE = main
 
 all: $(EXE)
 
-main: display.o rotations.o otsu.o pixel_operations.o
+main: main.o tools.o
 
 $(foreach f, $(EXE), $(eval $(f):))
 

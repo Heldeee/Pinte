@@ -4,10 +4,83 @@
 #include <string.h>
 #include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
-#include "SDL/SDL_rotozoom.h"
 #include <gtk/gtk.h>
 
 #include "tools.h"
+
+/*typedef struct UserInterface
+{
+    GtkWindow *window;
+    GtkButton *load;
+    GtkButton *show;
+    GtkButton *save;
+    GtkButton *resolve;
+    GtkButton *network;
+    GtkEntry *Rotation;
+    GtkButton *Enter;
+    GtkCheckButton *Auto;
+    GtkCheckButton *Manual;
+    GtkCheckButton *IA;
+    GtkCheckButton *bw;
+    GtkCheckButton *Grid;
+    GtkButton *Generate;
+    GtkButton *web;
+}UserInterface;
+
+typedef struct Create_sudoku
+{
+    char *file;
+    int posx;
+    int posy;
+    int grid[81];
+    int gridx;
+    int gridy;
+    SDL_Surface* surface;
+    GtkWindow *win;
+    GtkImage* img;
+    GtkButton *new;
+    GtkButton *back;
+    GtkButton *add;
+    GtkButton *_0;
+    GtkButton *_1;
+    GtkButton *_2;
+    GtkButton *_3;
+    GtkButton *_4;
+    GtkButton *_5;
+    GtkButton *_6;
+    GtkButton *_7;
+    GtkButton *_8;
+    GtkButton *_9;
+}cre_sud;
+
+typedef struct Image
+{
+    GtkImage *img;
+    SDL_Surface *rot_img;
+    SDL_Surface *otsu_img;
+    SDL_Surface *hough_img;
+    SDL_Surface *cases_img;
+}Image;
+
+typedef struct Application
+{
+    int is_hough;
+    gchar* filename;
+    int is_rot;
+    int is_resolve;
+    int is_otsu;
+    int is_generate;
+    SDL_Surface* image_surface;
+    SDL_Surface* dis_img;
+
+    Network network;
+    GtkWindow *pro_w;
+    GtkWindow *training_w;
+    Image image;
+    UserInterface ui;
+    cre_sud sud;
+}App;*/
+
 
 int main ()
 {
@@ -15,7 +88,7 @@ int main ()
     gtk_init(NULL, NULL);
 
     // Initializes SDL
-    init_sdl();
+    //init_sdl();
 
     // Loads the UI description and builds the UI.
     // (Exits if an error occurs.)
@@ -46,7 +119,7 @@ int main ()
     GtkEntry* Rotation = GTK_ENTRY(gtk_builder_get_object(builder,"Rotation"));
     GtkButton* Enter = GTK_BUTTON(gtk_builder_get_object(builder, "Enter"));
 
-    App app =
+    /*App app =
     {
         .filename = "",
 	.is_rot = 0,
@@ -58,19 +131,6 @@ int main ()
         .dis_img = NULL,
         .training_w = NULL,
         .is_hough = 0,
-	.network =
-	{
-	    .inputsize = SIZE,
-	    .hiddensize = HID,
-	    .outputsize = OUT,
-	    .input = {},
-	    .values = {},
-	    .output = {},
-	    .b1 = {},
-	    .b2 = {},
-	    .w1 = {},
-	    .w2 = {}, 
-	},
         .image = 
 	{ 
 	    .img = img,
@@ -97,32 +157,7 @@ int main ()
 	    .Generate = generate,
 	    .web = web,
         },
-	.sud =
-	{
-	    .file = "",
-	    .posx = 4,
-	    .posy = 4,
-	    .grid = {},
-	    .gridx = 0,
-	    .gridy = 0,
-	    .surface = NULL,
-	    .img = NULL,
-	    .win = NULL,
-	    .new = NULL,
-	    .add = NULL,
-	    .back = NULL,
-	    ._0 = NULL,
-	    ._1 = NULL,
-	    ._2 = NULL,
-	    ._3 = NULL,
-	    ._4 = NULL,
-	    ._5 = NULL,
-	    ._6 = NULL,
-	    ._7 = NULL,
-	    ._8 = NULL,
-	    ._9 = NULL,
-	}
-    };
+    {*/
 
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Auto), TRUE);
 
@@ -135,28 +170,21 @@ int main ()
     gtk_widget_set_sensitive(GTK_WIDGET(Enter), FALSE);
 
     // Connects signal handlers.
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-    g_signal_connect(load, "clicked", G_CALLBACK(openfile), &app);
-    g_signal_connect(show, "clicked", G_CALLBACK(on_show), &app);
-    g_signal_connect(save, "clicked", G_CALLBACK(on_save), &app);
-    g_signal_connect(resolve, "clicked", G_CALLBACK(on_resolve), &app);
-    g_signal_connect(network, "clicked", G_CALLBACK(on_network), &app);
-    g_signal_connect(Manual, "clicked", G_CALLBACK(Manu), &app);
-    g_signal_connect(Auto, "clicked", G_CALLBACK(Automatic), &app);
-    g_signal_connect(IA, "clicked", G_CALLBACK(IA_recognition), &app);
-    g_signal_connect(bw, "clicked", G_CALLBACK(BlackWhite), &app);
-    g_signal_connect(Grid, "clicked", G_CALLBACK(GridDetec), &app);
-    g_signal_connect(generate, "clicked", G_CALLBACK(generate_sud), &app);
-    g_signal_connect(web, "clicked", G_CALLBACK(open_website), &app);
-    g_signal_connect(Enter,"clicked",G_CALLBACK(value_changed), &app);
+    //g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+    g_signal_connect(load, "clicked", G_CALLBACK(openfile), NULL);
+    //g_signal_connect(show, "clicked", G_CALLBACK(on_show), &app);
+    g_signal_connect(save, "clicked", G_CALLBACK(on_save), NULL);
+    //g_signal_connect(bw, "clicked", G_CALLBACK(BlackWhite), &app);
+    //g_signal_connect(web, "clicked", G_CALLBACK(open_website), &app);
+    //g_signal_connect(Enter,"clicked",G_CALLBACK(value_changed), &app);
 
     // Runs the main loop.
     gtk_main();
 
-    SDL_FreeSurface(app.image_surface);
+    /*SDL_FreeSurface(app.image_surface);
     SDL_FreeSurface(app.dis_img);
     SDL_FreeSurface(app.image.otsu_img);
-    SDL_FreeSurface(app.image.rot_img);
+    SDL_FreeSurface(app.image.rot_img);*/
 
     return 0;
 }
