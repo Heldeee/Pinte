@@ -1,14 +1,8 @@
-//sdl function
-//
-//
 #include <stdio.h>
 #include <stdlib.h>
-#include <err.h>
-#include <math.h>
+ #include <err.h>
 #include "SDL/SDL.h"
 #include "SDL/SDL_image.h"
-
-#include "filters.c"
 
 void init_sdl()
 {
@@ -75,24 +69,25 @@ void wait_for_keypressed()
 
 void SDL_FreeSurface(SDL_Surface *surface);
 
-
-int main(int argc, char* argv[])
+int main()
 {
-    if (argc != 2)
-    {
-        errx(1, "Wrong arguements.");
-    }
+	SDL_Surface* image_surface;
+	SDL_Surface* screen_surface;
 
-    init_sdl();
+	// Initialize the SDL
+	init_sdl();
 
-    char* filename = argv[1];
+	image_surface = load_image("hihi.png");
+	// Display the image.
+	screen_surface = display_image(image_surface);
 
-    SDL_Surface* image = load_image(filename);
+	// Wait for a key to be pressed.
+	wait_for_keypressed();
 
-    Flip(image);
+	// Free the image surface.
+	SDL_FreeSurface(image_surface);
+	// Free the screen surface.
+	SDL_FreeSurface(screen_surface);
 
-    display_image(image);
-    
-    wait_for_keypressed();
-    
+	return 0;
 }

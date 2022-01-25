@@ -1,8 +1,8 @@
 CC=gcc
 CPPFLAGS=
-CFLAGS=-Wall -Wextra -Werror -std=c99 $$(pkg-config --cflags sdl SDL_image SDL_gfx)
+CFLAGS=-Wall -Wextra -Werror -std=c99 
 LDFLAGS=
-LDLIBS= -lm $$(pkg-config --libs sdl SDL_image SDL_gfx)
+LDLIBS= `pkg-config --libs sdl` -lSDL_image -lSDL_gfx -lm
 EXEC=filters
 
 SRC= filters.c main.c

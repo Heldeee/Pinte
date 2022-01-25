@@ -78,25 +78,6 @@ void put_pixel(SDL_Surface *surface, unsigned x, unsigned y, Uint32 pixel)
     }
 }
 
-// Blackscale function
-Uint32 blackAndwhite(Uint32 Pixel, SDL_PixelFormat *Format, int value)
-{
-    if(value !=3)
-    {
-    }
-    Uint8 r;
-    Uint8 g;
-    Uint8 b;
-    SDL_GetRGB(Pixel, Format, &r, &g, &b);
-    if (r<=240 || g<=240 || b<=240)
-    {
-        return SDL_MapRGB(Format, 255, 255, 255);
-    }
-    else
-    {
-        return SDL_MapRGB(Format, 0, 0, 0);
-    }
-}
 
 void insertionSort(Uint8 arr[], int n)
 {
@@ -180,24 +161,7 @@ void Flip(SDL_Surface *img)
     free(flipped);
 }
 
-Uint32 Toblack(Uint32 Pixel, SDL_PixelFormat *Format, int value)
-{
-    if(value!=3)
-    {
-    }
-    Uint8 r;
-    Uint8 g;
-    Uint8 b;
-    SDL_GetRGB(Pixel, Format, &r, &g, &b);
-    if (r>=240 || g>=240 || b>=240)
-    {
-        return SDL_MapRGB(Format, 0, 0, 0);
-    }
-    else
-    {
-        return SDL_MapRGB(Format, 255, 255, 255);
-    }
-}
+
 
 
 
