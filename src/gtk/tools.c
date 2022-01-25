@@ -8,54 +8,6 @@
 #include <gtk/gtk.h>
 
 
-typedef struct UserInterface
-{
-    GtkWindow *window;
-    GtkButton *load;
-    GtkButton *show;
-    GtkButton *save;
-    GtkButton *resolve;
-    GtkButton *network;
-    GtkEntry *Rotation;
-    GtkButton *Enter;
-    GtkCheckButton *Auto;
-    GtkCheckButton *Manual;
-    GtkCheckButton *IA;
-    GtkCheckButton *bw;
-    GtkCheckButton *Grid;
-    GtkButton *Generate;
-    GtkButton *web;
-}UserInterface;
-
-typedef struct Image
-{
-    GtkImage *img;
-    SDL_Surface *rot_img;
-    SDL_Surface *otsu_img;
-    SDL_Surface *hough_img;
-    SDL_Surface *cases_img;
-}Image;
-
-typedef struct Application
-{
-    int is_hough;
-    gchar* filename;
-    int is_rot;
-    int is_resolve;
-    int is_otsu;
-    int is_training;
-    int is_generate;
-    SDL_Surface* image_surface;
-    SDL_Surface* dis_img;
-
-    Network network;
-    GtkWindow *pro_w;
-    GtkWindow *training_w;
-    Image image;
-    UserInterface ui;
-    cre_sud sud;
-}App;
-
 void display_pro(App* app)
 {
     GtkBuilder* builder = gtk_builder_new();
