@@ -7,6 +7,7 @@
 #include <gtk/gtk.h>
 
 #include "tools.h"
+//#include "display.h"
 
 /*typedef struct UserInterface
 {
@@ -84,6 +85,8 @@ typedef struct Application
 
 int main ()
 {
+
+    gchar filename;
     // Initializes GTK.
     gtk_init(NULL, NULL);
 

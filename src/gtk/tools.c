@@ -7,43 +7,63 @@
 #include "SDL/SDL_rotozoom.h"
 #include <gtk/gtk.h>
 
+//#include "display.h"
+
 gchar* filename = "";
-/*void display_pro(App* app)
+
+/*void on_show(GtkButton *button, gpointer user_data)
 {
-    GtkBuilder* builder = gtk_builder_new();
-    GError* error = NULL;
-    if (gtk_builder_add_from_file(builder, "../data/progress.glade", &error) == 0)
+    button = button;
+    if (app->image_surface == NULL)
     {
-        g_printerr("Error loading file: %s\n", error->message);
-        g_clear_error(&error);
+	GtkWidget* dialog;
+        GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+        dialog = gtk_message_dialog_new_with_markup(app->ui.window,
+            flags,
+            GTK_MESSAGE_ERROR,
+            GTK_BUTTONS_CLOSE,
+            "Error!\n\nNo image.\n\nPlease, load an image before show.");
+
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        g_signal_connect_swapped(dialog, "response",
+            G_CALLBACK(gtk_widget_destroy),
+            dialog);
+	gtk_widget_destroy(dialog);
     }
     else
     {
-        GtkWindow* pro_w = GTK_WINDOW(gtk_builder_get_object(builder, "pro_w"));
-        GtkProgressBar* pro_bar = GTK_PROGRESS_BAR(gtk_builder_get_object(builder, "pro_bar"));
-        GtkLabel *label = GTK_LABEL(gtk_builder_get_object(builder, "label"));
+        GtkBuilder* builder = gtk_builder_new();
+        GError* error = NULL;
+        if (gtk_builder_add_from_file(builder, "../data/show_window.glade", &error) == 0)
+        {
+            g_printerr("Error loading file: %s\n", error->message);
+            g_clear_error(&error);
+        }
+        else
+        {
+	    SDL_SaveBMP(app->image_surface, "../Image/tmp_img/vrai_image.bmp");
+	    GtkWindow* w = GTK_WINDOW(gtk_builder_get_object(builder, "window"));
+            GtkImage* img = GTK_IMAGE(gtk_builder_get_object(builder, "img"));
 
-        gtk_label_set_label(label, "Resolving...\n");
-    app->pro_w = pro_w;
-        g_timeout_add(1000, (GSourceFunc)des_w, app);
-        g_timeout_add(1000, (GSourceFunc)handle_progress, pro_bar);
-        gtk_widget_show_all(GTK_WIDGET(pro_w));
-        g_signal_connect_swapped(G_OBJECT(pro_w), "destroy", G_CALLBACK(close_window), NULL);
+            gtk_widget_show_all(GTK_WIDGET(w));
+	    gtk_image_set_from_file(img, "../Image/tmp_img/vrai_image.bmp");
+            g_signal_connect_swapped(G_OBJECT(w), "destroy", G_CALLBACK(close_window), NULL);
+        }
     }
 }*/
 
-SDL_Surface* resize(SDL_Surface *img)
+/*SDL_Surface* resize(SDL_Surface *img)
 {
-    /*double zoomx = (double)nw / (double)w;
+    double zoomx = (double)nw / (double)w;
     double zoomy = (double)nh / (double)h;
-    img = zoomSurface(img, zoomx, zoomy, 0);*/
+    img = zoomSurface(img, zoomx, zoomy, 0);
 
     while (img->w > 740 || img->h > 700)
     {
         img = rotozoomSurface(img, 0, 0.9, 0);
     }
     return img;
-}
+}*/
 
 void openfile(GtkButton *button, gpointer user_data)
 {
@@ -99,7 +119,7 @@ void on_save(GtkButton *button, gpointer user_data)
         {
             gchar* filename;
             filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-            //g_print("%s\n", filename);
+            g_print("%s\n", filename);
             break;
         }
         default:
