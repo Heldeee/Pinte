@@ -109,17 +109,17 @@ int main ()
     GtkButton* load = GTK_BUTTON(gtk_builder_get_object(builder, "load"));
     GtkButton* show = GTK_BUTTON(gtk_builder_get_object(builder, "show"));
     GtkButton* save = GTK_BUTTON(gtk_builder_get_object(builder, "save"));
-    GtkButton* resolve = GTK_BUTTON(gtk_builder_get_object(builder, "resolve"));
-    GtkButton* network = GTK_BUTTON(gtk_builder_get_object(builder, "network"));
-    GtkCheckButton* Auto = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "Auto"));
-    GtkCheckButton* Manual = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "Manual"));
-    GtkCheckButton* IA = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "IA"));
+    //GtkButton* resolve = GTK_BUTTON(gtk_builder_get_object(builder, "resolve"));
+    //GtkButton* network = GTK_BUTTON(gtk_builder_get_object(builder, "network"));
+    //GtkCheckButton* Auto = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "Auto"));
+    //GtkCheckButton* Manual = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "Manual"));
+    //GtkCheckButton* IA = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "IA"));
     GtkCheckButton* bw = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "bw"));
     GtkCheckButton* Grid = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "Grid"));
     GtkImage *img = GTK_IMAGE(gtk_builder_get_object(builder, "img_sud"));
     GtkButton* generate = GTK_BUTTON(gtk_builder_get_object(builder, "generate"));
     GtkButton* web = GTK_BUTTON(gtk_builder_get_object(builder, "web"));
-    GtkEntry* Rotation = GTK_ENTRY(gtk_builder_get_object(builder,"Rotation"));
+    //GtkEntry* Rotation = GTK_ENTRY(gtk_builder_get_object(builder,"Rotation"));
     GtkButton* Enter = GTK_BUTTON(gtk_builder_get_object(builder, "Enter"));
 
     /*App app =

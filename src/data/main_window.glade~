@@ -246,6 +246,8 @@
                           <object class="GtkEntry" id="Rotation">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="valign">center</property>
+                            <property name="margin_right">10</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -254,10 +256,12 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="Enter">
-                            <property name="label" translatable="yes">button</property>
+                            <property name="label" translatable="yes">Enter</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="halign">center</property>
+                            <property name="valign">center</property>
                           </object>
                           <packing>
                             <property name="left_attach">2</property>

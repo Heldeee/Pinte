@@ -11,7 +11,7 @@
 
 gchar* filename = "";
 
-/*void on_show(GtkButton *button, gpointer user_data)
+void on_show(GtkButton *button, gpointer user_data)
 {
     button = button;
     if (app->image_surface == NULL)
@@ -50,7 +50,7 @@ gchar* filename = "";
             g_signal_connect_swapped(G_OBJECT(w), "destroy", G_CALLBACK(close_window), NULL);
         }
     }
-}*/
+}
 
 /*SDL_Surface* resize(SDL_Surface *img)
 {

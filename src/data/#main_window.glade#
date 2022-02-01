@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow" id="The Ambitions">
+  <object class="GtkWindow" id="ALPH">
     <property name="width-request">1200</property>
     <property name="height-request">800</property>
     <property name="visible">True</property>
@@ -28,20 +28,6 @@
               </object>
               <packing>
                 <property name="left-attach">2</property>
-                <property name="top-attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="generate">
-                <property name="label" translatable="yes">Generate Sudoku</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="halign">center</property>
-                <property name="valign">center</property>
-              </object>
-              <packing>
-                <property name="left-attach">3</property>
                 <property name="top-attach">0</property>
               </packing>
             </child>
@@ -78,6 +64,20 @@
               </object>
               <packing>
                 <property name="left-attach">5</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="generate">
+                <property name="label" translatable="yes">Generate Sudoku</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+              </object>
+              <packing>
+                <property name="left-attach">3</property>
                 <property name="top-attach">0</property>
               </packing>
             </child>
