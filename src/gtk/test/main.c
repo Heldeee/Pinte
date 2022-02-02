@@ -25,8 +25,10 @@ gboolean on_motion(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 
     cairo_t *context = cairo_create(surface);
 
-    cairo_rectangle(context, x, y, 10, 10);
-    cairo_stroke(context);
+    cairo_rectangle(context, x, y, 1, 1);
+    cairo_fill(context);
+
+
     cairo_destroy(context);
 
     gtk_widget_queue_draw_area(widget, 0, 0,
@@ -41,7 +43,7 @@ void create_window(GtkApplication *app, gpointer data)
     GtkWidget *window;
     GtkWidget *drawarea;
 
-    GtkBuilder *builder = gtk_builder_new_from_file("../../data/pinte.glade~");
+    GtkBuilder *builder = gtk_builder_new_from_file("pinte.glade");
     CHECK(builder)
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
     CHECK(window)
