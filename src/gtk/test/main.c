@@ -41,7 +41,7 @@ void create_window(GtkApplication *app, gpointer data)
     GtkWidget *window;
     GtkWidget *drawarea;
 
-    GtkBuilder *builder = gtk_builder_new_from_file("../../data/pinte.glade");
+    GtkBuilder *builder = gtk_builder_new_from_file("../../data/pinte.glade~");
     CHECK(builder)
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
     CHECK(window)
