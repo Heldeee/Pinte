@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <gtk/gtk.h>
+#include <math.h>
 
 #define CHECK(pointer) \
         if(pointer == NULL) \
             exit(1);
+int size1 = 1;
 
 cairo_surface_t *surface;
 
@@ -17,26 +19,74 @@ gboolean on_draw(GtkWidget *widget, cairo_t *context, gpointer user_data)
 
 }
 
-gboolean on_motion(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+/*on_update_button_clicked(GtkButton *Update_Button)
 {
-    GdkEventMotion * e = (GdkEventMotion *) event;
-    double x = e->x;
-    double y = e->y;
+     //2nd argument is serial_data function which contain actual data    
+     g_timeout_add(250,serial_data,NULL); 
+}*/
 
-    cairo_t *context = cairo_create(surface);
+double mouseX;
+double mouseY;
+double previousX, previousY;
+int acc = 0;
 
-    cairo_rectangle(context, x, y, 1, 1);
-    cairo_fill(context);
+gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+    if(GDK_BUTTON_PRESS)
+    {
+        cairo_t *context = cairo_create(surface);
+
+        //printf("ZIZOU\n");
+        if(acc != 0)
+        {
+                previousX = mouseX;
+                previousY = mouseY;
+        }
+        GdkEventMotion * e = (GdkEventMotion *) event;
+        if (acc == 0)
+        {
+            previousX = e->x;
+            previousY = e->y;
+            cairo_rectangle(context, previousX, previousY, size1, size1);
+            cairo_fill(context);
+        }
+        mouseX= e->x;
+        mouseY = e->y;
 
 
-    cairo_destroy(context);
+        cairo_set_source_rgb(context, 0, 0, 0);
+        cairo_set_line_width(context, size1);
+        //printf("PX: %f | PY %f\n", previousX, previousY);
+        //printf("X: %f | Y %f\n", mouseX, mouseY);
 
-    gtk_widget_queue_draw_area(widget, 0, 0,
-            gtk_widget_get_allocated_width(widget),
-            gtk_widget_get_allocated_height(widget));
-    
+        cairo_move_to(context, previousX, previousY);
+        cairo_line_to(context, mouseX, mouseY);
+        cairo_stroke(context);
+        acc = 1;
+        //printf("%i\n", acc);
+        //cairo_rectangle(context, mouseX, mouseY, 3, 3);
+        //cairo_fill(context);
+
+
+        cairo_destroy(context);
+
+        gtk_widget_queue_draw_area(widget, 0, 0,
+                gtk_widget_get_allocated_width(widget),
+                gtk_widget_get_allocated_height(widget));
+        return TRUE;
+    }
+
+
+    return FALSE;
+}
+
+gboolean on_click_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+    //printf("ZIZOU2\n");
+    acc = 0;
     return TRUE;
 }
+
 
 void create_window(GtkApplication *app, gpointer data)
 {
@@ -50,11 +100,18 @@ void create_window(GtkApplication *app, gpointer data)
     drawarea = GTK_WIDGET(gtk_builder_get_object(builder, "drawarea"));
     CHECK(drawarea)
 
-    gtk_widget_add_events(drawarea, GDK_POINTER_MOTION_MASK);
-    g_signal_connect(drawarea, "motion-notify-event", G_CALLBACK(on_motion), NULL);
+    //gtk_widget_add_events(drawarea, GDK_POINTER_MOTION_MASK);
+    gtk_widget_add_events(drawarea, 
+            GDK_BUTTON_PRESS_MASK |
+            GDK_BUTTON_MOTION_MASK |
+            GDK_BUTTON_RELEASE_MASK);
+    g_signal_connect(drawarea, "button-press-event", G_CALLBACK(on_click), NULL); //blc
+    g_signal_connect(drawarea, "motion-notify-event", G_CALLBACK(on_click), NULL); //important
+    g_signal_connect(drawarea, "button-release-event", G_CALLBACK(on_click_release), NULL);
+    g_signal_connect(G_OBJECT(drawarea), "draw", G_CALLBACK(on_draw), NULL);
 
 
-    g_signal_connect(drawarea, "draw", G_CALLBACK(on_draw), NULL);
+    //g_signal_connect(drawarea, "draw", G_CALLBACK(on_draw), NULL); useless
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_widget_show_all(window);
 
