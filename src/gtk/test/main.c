@@ -30,13 +30,19 @@ double mouseY;
 double previousX, previousY;
 int acc = 0;
 
+
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
-{
+{   
+   
+    //cairo_t *context = cairo_create(surface);
+    //cairo_set_line_width(context, size1);
+    //cairo_set_source_rgb(context,50/255,50/255,50/255);
     if(GDK_BUTTON_PRESS)
     {
         cairo_t *context = cairo_create(surface);
-
-        //printf("ZIZOU\n");
+        cairo_set_line_width(context, size1);
+        cairo_set_source_rgb(context,50/255,50/255,50/255);
+        
         if(acc != 0)
         {
                 previousX = mouseX;
@@ -52,10 +58,25 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
         }
         mouseX= e->x;
         mouseY = e->y;
+    
+        if (event->button ==1)
+        {
+            cairo_set_source_rgb(context,0.0,0.0,0.0);
+            
 
+            printf("adugasduk\n");
+        }
+        if (event->button == 3)
+        {
+            cairo_set_source_rgb(context,50/255,205/255,50/255);
+            printf("uiaguiqwdqwiohioq\n");
+         
 
-        cairo_set_source_rgb(context, 0, 0, 0);
-        cairo_set_line_width(context, size1);
+        }
+        printf("zizou\n");
+       
+        //cairo_set_source_rgb(context, 0, 0, 0);
+        //cairo_set_line_width(context, size1);
         //printf("PX: %f | PY %f\n", previousX, previousY);
         //printf("X: %f | Y %f\n", mouseX, mouseY);
 
