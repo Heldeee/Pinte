@@ -9,10 +9,11 @@
 int size1 = 1;
 
 cairo_surface_t *surface;
-
+cairo_t *context;
 
 gboolean on_draw(GtkWidget *widget, cairo_t *context, gpointer user_data)
 {
+    cairo_set_source_rgba(context, 0.5, 0.5, 0.1,1);
     cairo_set_source_surface(context, surface, 0, 0);
     cairo_paint(context);
     return TRUE;
@@ -29,6 +30,9 @@ double mouseX;
 double mouseY;
 double previousX, previousY;
 int acc = 0;
+double red = 0;
+double green = 0;
+double blue = 0;
 
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
@@ -40,8 +44,10 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
     if(GDK_BUTTON_PRESS)
     {
         cairo_t *context = cairo_create(surface);
+        cairo_set_source_rgba(context,50/255,50/255,50/255, 1);
         cairo_set_line_width(context, size1);
-        cairo_set_source_rgb(context,50/255,50/255,50/255);
+
+        printf("debut");
         
         if(acc != 0)
         {
@@ -51,6 +57,7 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
         GdkEventMotion * e = (GdkEventMotion *) event;
         if (acc == 0)
         {
+            cairo_set_source_rgba(context,50/255,50/255,50/255, 1);
             previousX = e->x;
             previousY = e->y;
             cairo_rectangle(context, previousX, previousY, size1, size1);
@@ -61,25 +68,29 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
     
         if (event->button ==1)
         {
-            cairo_set_source_rgb(context,0.0,0.0,0.0);
+            red = 0;
+            green = 0;
+            blue = 0;
             
 
             printf("adugasduk\n");
         }
         if (event->button == 3)
         {
-            cairo_set_source_rgb(context,50/255,205/255,50/255);
+            blue = 1;
+            red = 1;
+            green = 1;
             printf("uiaguiqwdqwiohioq\n");
          
 
         }
         printf("zizou\n");
-       
+
         //cairo_set_source_rgb(context, 0, 0, 0);
         //cairo_set_line_width(context, size1);
         //printf("PX: %f | PY %f\n", previousX, previousY);
         //printf("X: %f | Y %f\n", mouseX, mouseY);
-
+        cairo_set_source_rgb(context,red,green,blue);
         cairo_move_to(context, previousX, previousY);
         cairo_line_to(context, mouseX, mouseY);
         cairo_stroke(context);
