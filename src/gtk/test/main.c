@@ -8,6 +8,9 @@
             exit(1);
 int size1 = 1;
 
+
+
+
 cairo_surface_t *surface;
 cairo_t *context;
 
@@ -33,7 +36,20 @@ int acc = 0;
 double red = 0;
 double green = 0;
 double blue = 0;
+GdkRGBA couleur;
 
+/*gboolean on_click_color(GtkWidget *widget, gpointer user_data)
+{
+    //gtk_color_button_get_rgba((GTK_COLOR_BUTTON) widget, couleur);
+}*/
+
+void on_color1_color_set(GtkColorButton *cb)
+{
+    gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(cb), &couleur);
+    red = couleur.red;
+    green = couleur.green;
+    blue = couleur.blue;
+}
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {   
@@ -44,10 +60,10 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
     if(GDK_BUTTON_PRESS)
     {
         cairo_t *context = cairo_create(surface);
-        cairo_set_source_rgba(context,50/255,50/255,50/255, 1);
+        //cairo_set_source_rgba(context,50/255,50/255,50/255, 1);
         cairo_set_line_width(context, size1);
 
-        printf("debut");
+        //printf("debut");
         
         if(acc != 0)
         {
@@ -57,7 +73,7 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
         GdkEventMotion * e = (GdkEventMotion *) event;
         if (acc == 0)
         {
-            cairo_set_source_rgba(context,50/255,50/255,50/255, 1);
+            //cairo_set_source_rgba(context,50/255,50/255,50/255, 1);
             previousX = e->x;
             previousY = e->y;
             cairo_rectangle(context, previousX, previousY, size1, size1);
@@ -66,7 +82,7 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
         mouseX= e->x;
         mouseY = e->y;
     
-        if (event->button ==1)
+        /*if (event->button ==1)
         {
             red = 0;
             green = 0;
@@ -84,13 +100,15 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
          
 
         }
-        printf("zizou\n");
+        printf("zizou\n");*/
 
         //cairo_set_source_rgb(context, 0, 0, 0);
         //cairo_set_line_width(context, size1);
         //printf("PX: %f | PY %f\n", previousX, previousY);
         //printf("X: %f | Y %f\n", mouseX, mouseY);
-        cairo_set_source_rgb(context,red,green,blue);
+        //cairo_set_source_rgba(context,couleur->red,couleur->blue,couleur->green, couleur->alpha);
+        //cairo_set_source_rgb(context, red, green, blue);
+        cairo_set_source_rgb(context, red, green, blue);
         cairo_move_to(context, previousX, previousY);
         cairo_line_to(context, mouseX, mouseY);
         cairo_stroke(context);
@@ -124,6 +142,7 @@ void create_window(GtkApplication *app, gpointer data)
 {
     GtkWidget *window;
     GtkWidget *drawarea;
+    GtkWidget *color1;
 
     GtkBuilder *builder = gtk_builder_new_from_file("pinte.glade");
     CHECK(builder)
@@ -131,6 +150,8 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(window)
     drawarea = GTK_WIDGET(gtk_builder_get_object(builder, "drawarea"));
     CHECK(drawarea)
+    color1 = GTK_WIDGET(gtk_builder_get_object(builder, "color1"));
+    CHECK(color1)
 
     //gtk_widget_add_events(drawarea, GDK_POINTER_MOTION_MASK);
     gtk_widget_add_events(drawarea, 
@@ -140,6 +161,7 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(drawarea, "button-press-event", G_CALLBACK(on_click), NULL); //blc
     g_signal_connect(drawarea, "motion-notify-event", G_CALLBACK(on_click), NULL); //important
     g_signal_connect(drawarea, "button-release-event", G_CALLBACK(on_click_release), NULL);
+    g_signal_connect(color1, "color-set", G_CALLBACK(on_color1_color_set), NULL);
     g_signal_connect(G_OBJECT(drawarea), "draw", G_CALLBACK(on_draw), NULL);
 
 

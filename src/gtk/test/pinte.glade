@@ -70,10 +70,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkColorButton">
+                  <object class="GtkColorButton" id="color1">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
+                    <signal name="color-set" handler="on_color1_color_set" swapped="no"/>
                   </object>
                   <packing>
                     <property name="resize">True</property>
