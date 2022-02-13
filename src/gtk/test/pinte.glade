@@ -12,7 +12,7 @@
         <property name="can-focus">True</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkMenuBar">
+          <object class="GtkMenuBar" id="menu">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <child>
@@ -26,12 +26,13 @@
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem">
+                      <object class="GtkImageMenuItem" id="new">
                         <property name="label">gtk-new</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="use-underline">True</property>
                         <property name="use-stock">True</property>
+                        <signal name="activate" handler="on_new_activate" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -142,14 +143,15 @@
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">_Help</property>
+                <property name="label" translatable="yes">_About</property>
                 <property name="use-underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
+                    <property name="menu-type-hint">normal</property>
                     <child>
-                      <object class="GtkImageMenuItem">
+                      <object class="GtkImageMenuItem" id="web">
                         <property name="label">gtk-about</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
@@ -164,7 +166,7 @@
           </object>
           <packing>
             <property name="resize">False</property>
-            <property name="shrink">True</property>
+            <property name="shrink">False</property>
           </packing>
         </child>
         <child>

@@ -85,6 +85,14 @@ void return_draw()
     filename = NULL;
 }
 
+void website_button()
+{
+    printf("Opening website...\n");
+    int a = system("xdg-open https://akaagi.github.io/Pinte_Website/accueil.html");
+    if (a)
+    {}
+}
+
 /*static gboolean on_draw(GtkWidget *da, GdkEvent *event, cairo_t* cr, gpointer data)
 {
     (void)event; (void)data;
@@ -252,6 +260,7 @@ void create_window(GtkApplication *app, gpointer data)
     GtkButton *load;
     GtkButton *pen;
     GtkButton *erase;
+    GtkWidget *web;
     //GtkWidget *hscale;
 
     //glob.image = cairo_image_surface_create_from_png("pinte.png");
@@ -270,6 +279,8 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(load)
     erase = GTK_BUTTON(gtk_builder_get_object(builder, "erase"));
     CHECK(erase)
+    web = GTK_WIDGET(gtk_builder_get_object(builder, "web"));
+    CHECK(web)
     //hscale = GTK_WIDGET(gtk_builder_get_object(builder, "erase"));
     //CHECK(hscale)
 
@@ -288,6 +299,7 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(drawarea, "button-release-event", G_CALLBACK(on_click_release), NULL);
     g_signal_connect(color1, "color-set", G_CALLBACK(on_color1_color_set), NULL);
     g_signal_connect(G_OBJECT(drawarea), "draw", G_CALLBACK(on_draw), NULL);
+    g_signal_connect(web, "activate", G_CALLBACK(website_button), NULL);
     //g_signal_connect(hscale, "value-changed", G_CALLBACK(value_changed), NULL); 
 
 
