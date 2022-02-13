@@ -12,9 +12,12 @@ struct {
 } glob;
 
 
-int size1 = 1;
 gchar filename1;
 const char* filename;
+GtkRange *range;
+gdouble size1 = 1;
+
+
 
 void openfile(GtkButton *button, gpointer user_data)
 {
@@ -47,6 +50,9 @@ void openfile(GtkButton *button, gpointer user_data)
     gtk_widget_destroy(dialog);
 }
 
+double red = 0;
+double green = 0;
+double blue = 0;
 
 cairo_surface_t *surface;
 cairo_t *context;
@@ -72,9 +78,11 @@ gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
     }
     
 }
+size_t erased = 0;
 void return_draw()
 {
-  filename = NULL;
+    erased = 0;
+    filename = NULL;
 }
 
 /*static gboolean on_draw(GtkWidget *da, GdkEvent *event, cairo_t* cr, gpointer data)
@@ -108,9 +116,6 @@ double mouseX;
 double mouseY;
 double previousX, previousY;
 int acc = 0;
-double red = 0;
-double green = 0;
-double blue = 0;
 GdkRGBA couleur;
 
 
@@ -124,54 +129,110 @@ void on_color1_color_set(GtkColorButton *cb)
 
 void erase_white()
 {
-  red = 1;
-  green = 1;
-  blue = 1;
+    erased = 1;
 }
+
+/*void value_changed(GtkRange *range, gpointer win) {
+    
+   size1 = gtk_range_get_value(range);
+   gchar *str = g_strdup_printf("%.f", size1);    
+   gtk_label_set_text(GTK_LABEL(win), str);
+   
+   g_free(str);
+}*/
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {   
-   
-    if(GDK_BUTTON_PRESS)
+    if (erased == 0) 
     {
-        printf("test\n");
-        cairo_t *context = cairo_create(surface);
-        cairo_set_line_width(context, size1);
-
-        
-        if(acc != 0)
+        if(GDK_BUTTON_PRESS)
         {
+            //printf("test\n");
+            cairo_t *context = cairo_create(surface);
+            cairo_set_line_width(context, size1);
+
+
+            if(acc != 0)
+            {
                 previousX = mouseX;
                 previousY = mouseY;
+            }
+            GdkEventMotion * e = (GdkEventMotion *) event;
+            if (acc == 0)
+            {
+                cairo_set_source_rgb(context, red, green, blue);
+                previousX = e->x;
+                previousY = e->y;
+                //cairo_translate(context, size1/2, size1/2);
+                //cairo_arc(context, previousX, previousY, size1, 0, 2*M_PI);
+                cairo_rectangle(context, previousX, previousY, size1, size1);
+                //cairo_fill_preserve(context);
+
+            }
+            mouseX= e->x;
+            mouseY = e->y;
+
+
+            cairo_set_source_rgb(context, red, green, blue);
+            cairo_move_to(context, previousX, previousY);
+            cairo_line_to(context, mouseX, mouseY);
+            cairo_stroke(context);
+            acc = 1;
+
+
+            cairo_destroy(context);
+
+            gtk_widget_queue_draw_area(widget, 0, 0,
+                    gtk_widget_get_allocated_width(widget),
+                    gtk_widget_get_allocated_height(widget));
+            return TRUE;
         }
-        GdkEventMotion * e = (GdkEventMotion *) event;
-        if (acc == 0)
-        {
-            previousX = e->x;
-            previousY = e->y;
-            cairo_rectangle(context, previousX, previousY, size1, size1);
-            cairo_fill(context);
-        }
-        mouseX= e->x;
-        mouseY = e->y;
-    
-
-        cairo_set_source_rgb(context, red, green, blue);
-        cairo_move_to(context, previousX, previousY);
-        cairo_line_to(context, mouseX, mouseY);
-        cairo_stroke(context);
-        acc = 1;
-
-
-        cairo_destroy(context);
-
-        gtk_widget_queue_draw_area(widget, 0, 0,
-                gtk_widget_get_allocated_width(widget),
-                gtk_widget_get_allocated_height(widget));
-        return TRUE;
     }
+    else
+    {
+        if(GDK_BUTTON_PRESS)
+        {
+            //printf("test\n");
+            cairo_t *context = cairo_create(surface);
+            cairo_set_line_width(context, 10);
 
 
+            if(acc != 0)
+            {
+                previousX = mouseX;
+                previousY = mouseY;
+            }
+            GdkEventMotion * e = (GdkEventMotion *) event;
+            if (acc == 0)
+            {
+                cairo_set_source_rgb(context, 1, 1, 1);
+                previousX = e->x;
+                previousY = e->y;
+                //cairo_translate(context, size1/2, size1/2);
+                //cairo_arc(context, previousX, previousY, size1, 0, 2*M_PI);
+                cairo_rectangle(context, previousX, previousY, 10, 10);
+                //cairo_fill_preserve(context);
+
+            }
+            mouseX= e->x;
+            mouseY = e->y;
+
+
+            cairo_set_source_rgb(context, 1, 1, 1);
+            cairo_move_to(context, previousX, previousY);
+            cairo_line_to(context, mouseX, mouseY);
+            cairo_stroke(context);
+            acc = 1;
+
+
+            cairo_destroy(context);
+
+            gtk_widget_queue_draw_area(widget, 0, 0,
+                    gtk_widget_get_allocated_width(widget),
+                    gtk_widget_get_allocated_height(widget));
+            return TRUE;
+        }
+    }
     return FALSE;
 }
 
@@ -191,6 +252,7 @@ void create_window(GtkApplication *app, gpointer data)
     GtkButton *load;
     GtkButton *pen;
     GtkButton *erase;
+    //GtkWidget *hscale;
 
     //glob.image = cairo_image_surface_create_from_png("pinte.png");
 
@@ -208,6 +270,8 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(load)
     erase = GTK_BUTTON(gtk_builder_get_object(builder, "erase"));
     CHECK(erase)
+    //hscale = GTK_WIDGET(gtk_builder_get_object(builder, "erase"));
+    //CHECK(hscale)
 
 
     //g_signal_connect(G_OBJECT(drawarea), "draw",G_CALLBACK(on_draw_event), NULL); 
@@ -224,6 +288,7 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(drawarea, "button-release-event", G_CALLBACK(on_click_release), NULL);
     g_signal_connect(color1, "color-set", G_CALLBACK(on_color1_color_set), NULL);
     g_signal_connect(G_OBJECT(drawarea), "draw", G_CALLBACK(on_draw), NULL);
+    //g_signal_connect(hscale, "value-changed", G_CALLBACK(value_changed), NULL); 
 
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
@@ -235,7 +300,7 @@ void create_window(GtkApplication *app, gpointer data)
             gtk_widget_get_allocated_width(drawarea),
             gtk_widget_get_allocated_height(drawarea));
 
-    gtk_widget_set_app_paintable(drawarea, TRUE);
+    //gtk_widget_set_app_paintable(drawarea, TRUE);
 
     cairo_t *context = cairo_create(surface);
     cairo_set_source_rgba(context, 1, 1, 1, 1);
