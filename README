@@ -1,1 +1,10 @@
-hihi
+Leo DEVIN
+Angelo EAP
+Phu-Hung DANG
+Cristophe NGUYEN
+
+//------------------------------//
+Go in src/gtk/:
+	- use "make" to compile the application 
+	- lauch it by using "./main"
+//------------------------------//
