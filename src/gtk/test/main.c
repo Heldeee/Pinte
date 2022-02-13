@@ -38,6 +38,7 @@ void openfile(GtkButton *button, gpointer user_data)
     case GTK_RESPONSE_ACCEPT:
     {
         filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        glob.image = cairo_image_surface_create_from_png(filename);
         break;
     }
     default:
@@ -54,11 +55,26 @@ cairo_t *context;
 
 gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
 {
-    cairo_set_source_rgba(context, 0.5, 0.5, 0.1,1);
-    cairo_set_source_surface(context, surface, 0, 0);
-    //do_drawing(context);
+    if (filename == NULL)
+    {
+      
+      cairo_set_source_rgba(context, 0.5, 0.5, 0.1,1);
+      cairo_set_source_surface(context, surface, 0, 0);
+      //do_drawing(context);
+      cairo_paint(context);
+      return TRUE;
+    }
+    else
+    {
+    cairo_set_source_surface(context, glob.image, 0, 0);
     cairo_paint(context);
     return TRUE;
+    }
+    
+}
+void return_draw()
+{
+  filename = NULL;
 }
 
 /*static gboolean on_draw(GtkWidget *da, GdkEvent *event, cairo_t* cr, gpointer data)
@@ -104,6 +120,13 @@ void on_color1_color_set(GtkColorButton *cb)
     red = couleur.red;
     green = couleur.green;
     blue = couleur.blue;
+}
+
+void erase_white()
+{
+  red = 1;
+  green = 1;
+  blue = 1;
 }
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
@@ -166,8 +189,10 @@ void create_window(GtkApplication *app, gpointer data)
     GtkWidget *drawarea;
     GtkWidget *color1;
     GtkButton *load;
+    GtkButton *pen;
+    GtkButton *erase;
 
-    glob.image = cairo_image_surface_create_from_png("pinte.png");
+    //glob.image = cairo_image_surface_create_from_png("pinte.png");
 
     GtkBuilder *builder = gtk_builder_new_from_file("pinte.glade");
     CHECK(builder)
@@ -177,8 +202,12 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(drawarea)
     color1 = GTK_WIDGET(gtk_builder_get_object(builder, "color1"));
     CHECK(color1)
+    pen = GTK_BUTTON(gtk_builder_get_object(builder, "pen"));
+    CHECK(pen)
     load = GTK_BUTTON(gtk_builder_get_object(builder, "load"));
     CHECK(load)
+    erase = GTK_BUTTON(gtk_builder_get_object(builder, "erase"));
+    CHECK(erase)
 
 
     //g_signal_connect(G_OBJECT(drawarea), "draw",G_CALLBACK(on_draw_event), NULL); 
@@ -188,6 +217,8 @@ void create_window(GtkApplication *app, gpointer data)
             GDK_BUTTON_MOTION_MASK |
             GDK_BUTTON_RELEASE_MASK);
     g_signal_connect(load, "clicked", G_CALLBACK(openfile), NULL);
+    g_signal_connect(pen, "clicked", G_CALLBACK(return_draw), NULL);
+    g_signal_connect(erase, "clicked", G_CALLBACK(erase_white), NULL);
     g_signal_connect(drawarea, "button-press-event", G_CALLBACK(on_click), NULL); //blc
     g_signal_connect(drawarea, "motion-notify-event", G_CALLBACK(on_click), NULL); //important
     g_signal_connect(drawarea, "button-release-event", G_CALLBACK(on_click_release), NULL);
