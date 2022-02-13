@@ -381,16 +381,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="show">
-                    <property name="label" translatable="yes">Show loaded image</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">8</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
                   <placeholder/>

@@ -7,6 +7,10 @@
         if(pointer == NULL) \
             exit(1);
 
+struct {
+  cairo_surface_t *image;  
+} glob;
+
 
 int size1 = 1;
 gchar filename1;
@@ -43,34 +47,45 @@ void openfile(GtkButton *button, gpointer user_data)
 }
 
 
-
 cairo_surface_t *surface;
 cairo_t *context;
 
-gboolean on_draw(GtkWidget *widget, cairo_t *context, gpointer user_data)
+//static void do_drawing(cairo_t *cr);
+
+gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
 {
     cairo_set_source_rgba(context, 0.5, 0.5, 0.1,1);
     cairo_set_source_surface(context, surface, 0, 0);
+    //do_drawing(context);
     cairo_paint(context);
     return TRUE;
-
 }
 
-void show(GtkWidget *widget, cairo_t *cr){
+/*static gboolean on_draw(GtkWidget *da, GdkEvent *event, cairo_t* cr, gpointer data)
+{
+    (void)event; (void)data;
+    GdkPixbuf *pix;
+    GError *err = NULL;
+    pix = gdk_pixbuf_new_from_file("esfse", &err);
+    if(err)
+    {
+        printf("Error : %s\n", err->message);
+        g_error_free(err);
+        return FALSE;
+    }
+    //    cr = gdk_cairo_create (da->window);
+    gdk_cairo_set_source_pixbuf(cr, pix, 0, 0);
+    cairo_paint(cr);
+    //    cairo_fill (cr);
+    cairo_destroy (cr);
+    return FALSE;
+}*/
 
-    GdkPixbuf *pixbuf;
-
-    pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
-    printf("%s\n", filename);    
-
-    //===Set Source===//
-    gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
-
-    //===Fill===//  
-    cairo_fill(cr);
-
-    return;
-}
+/*static void do_drawing(cairo_t *cr)
+{
+  cairo_set_source_surface(cr, glob.image, 10, 10);
+  cairo_paint(cr);    
+}*/
 
 
 double mouseX;
@@ -96,6 +111,7 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
    
     if(GDK_BUTTON_PRESS)
     {
+        printf("test\n");
         cairo_t *context = cairo_create(surface);
         cairo_set_line_width(context, size1);
 
@@ -144,15 +160,14 @@ gboolean on_click_release(GtkWidget *widget, GdkEventButton *event, gpointer use
 }
 
 
-
 void create_window(GtkApplication *app, gpointer data)
 {
     GtkWidget *window;
     GtkWidget *drawarea;
     GtkWidget *color1;
     GtkButton *load;
-    GtkButton *show;
 
+    glob.image = cairo_image_surface_create_from_png("pinte.png");
 
     GtkBuilder *builder = gtk_builder_new_from_file("pinte.glade");
     CHECK(builder)
@@ -164,11 +179,9 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(color1)
     load = GTK_BUTTON(gtk_builder_get_object(builder, "load"));
     CHECK(load)
-    show = GTK_BUTTON(gtk_builder_get_object(builder, "show"));
-    CHECK(show)
 
 
-
+    //g_signal_connect(G_OBJECT(drawarea), "draw",G_CALLBACK(on_draw_event), NULL); 
 
     gtk_widget_add_events(drawarea, 
             GDK_BUTTON_PRESS_MASK |
@@ -179,11 +192,9 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(drawarea, "motion-notify-event", G_CALLBACK(on_click), NULL); //important
     g_signal_connect(drawarea, "button-release-event", G_CALLBACK(on_click_release), NULL);
     g_signal_connect(color1, "color-set", G_CALLBACK(on_color1_color_set), NULL);
-    g_signal_connect(show, "clicked", G_CALLBACK(show), NULL);
     g_signal_connect(G_OBJECT(drawarea), "draw", G_CALLBACK(on_draw), NULL);
 
 
-    //g_signal_connect(drawarea, "draw", G_CALLBACK(on_draw), NULL); useless
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_widget_show_all(window);
 
@@ -193,6 +204,7 @@ void create_window(GtkApplication *app, gpointer data)
             gtk_widget_get_allocated_width(drawarea),
             gtk_widget_get_allocated_height(drawarea));
 
+    gtk_widget_set_app_paintable(drawarea, TRUE);
 
     cairo_t *context = cairo_create(surface);
     cairo_set_source_rgba(context, 1, 1, 1, 1);
