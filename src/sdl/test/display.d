@@ -1,1 +1,0 @@
-display.o: display.c

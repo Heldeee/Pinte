@@ -1,193 +1,338 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <err.h>
-#include <string.h>
-#include "SDL/SDL.h"
-#include "SDL/SDL_image.h"
+#include <stdio.h>
 #include <gtk/gtk.h>
+#include <math.h>
 
-#include "tools.h"
-//#include "display.h"
+#define CHECK(pointer) \
+        if(pointer == NULL) \
+            exit(1);
 
-/*typedef struct UserInterface
+struct {
+  cairo_surface_t *image;  
+} glob;
+
+
+gchar filename1;
+const char* filename;
+GtkRange *range;
+gdouble size1 = 1;
+
+
+
+void openfile(GtkButton *button, gpointer user_data)
 {
-    GtkWindow *window;
-    GtkButton *load;
-    GtkButton *show;
-    GtkButton *save;
-    GtkButton *resolve;
-    GtkButton *network;
-    GtkEntry *Rotation;
-    GtkButton *Enter;
-    GtkCheckButton *Auto;
-    GtkCheckButton *Manual;
-    GtkCheckButton *IA;
-    GtkCheckButton *bw;
-    GtkCheckButton *Grid;
-    GtkButton *Generate;
-    GtkButton *web;
-}UserInterface;
+    button = button;
+    g_print("Loading...\n");
 
-typedef struct Create_sudoku
-{
-    char *file;
-    int posx;
-    int posy;
-    int grid[81];
-    int gridx;
-    int gridy;
-    SDL_Surface* surface;
-    GtkWindow *win;
-    GtkImage* img;
-    GtkButton *new;
-    GtkButton *back;
-    GtkButton *add;
-    GtkButton *_0;
-    GtkButton *_1;
-    GtkButton *_2;
-    GtkButton *_3;
-    GtkButton *_4;
-    GtkButton *_5;
-    GtkButton *_6;
-    GtkButton *_7;
-    GtkButton *_8;
-    GtkButton *_9;
-}cre_sud;
+    GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(button));
+    GtkFileFilter *filter = gtk_file_filter_new ();
+    GtkWidget* dialog = gtk_file_chooser_dialog_new(("Open image"),
+        GTK_WINDOW(toplevel),
+        GTK_FILE_CHOOSER_ACTION_OPEN,
+        "Open", GTK_RESPONSE_ACCEPT,
+        "Cancel", GTK_RESPONSE_CANCEL,
+        NULL);
 
-typedef struct Image
-{
-    GtkImage *img;
-    SDL_Surface *rot_img;
-    SDL_Surface *otsu_img;
-    SDL_Surface *hough_img;
-    SDL_Surface *cases_img;
-}Image;
+    gtk_file_filter_add_pixbuf_formats (filter);
+    gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog),filter);
 
-typedef struct Application
-{
-    int is_hough;
-    gchar* filename;
-    int is_rot;
-    int is_resolve;
-    int is_otsu;
-    int is_generate;
-    SDL_Surface* image_surface;
-    SDL_Surface* dis_img;
-
-    Network network;
-    GtkWindow *pro_w;
-    GtkWindow *training_w;
-    Image image;
-    UserInterface ui;
-    cre_sud sud;
-}App;*/
-
-
-int main ()
-{
-
-    gchar filename;
-    // Initializes GTK.
-    gtk_init(NULL, NULL);
-
-    // Initializes SDL
-    //init_sdl();
-
-    // Loads the UI description and builds the UI.
-    // (Exits if an error occurs.)
-    GtkBuilder* builder = gtk_builder_new();
-    GError* error = NULL;
-    if (gtk_builder_add_from_file(builder, "../data/main_window.glade", &error) == 0)
+    switch (gtk_dialog_run(GTK_DIALOG(dialog)))
     {
-        g_printerr("Error loading file: %s\n", error->message);
-        g_clear_error(&error);
-        return 1;
+    case GTK_RESPONSE_ACCEPT:
+    {
+        filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        glob.image = cairo_image_surface_create_from_png(filename);
+        break;
     }
+    default:
+        break;
+    }
+    gtk_widget_destroy(dialog);
+}
 
-    // Gets the widgets.
-    GtkWindow* window = GTK_WINDOW(gtk_builder_get_object(builder, "The Ambitions"));
-    GtkButton* load = GTK_BUTTON(gtk_builder_get_object(builder, "load"));
-    GtkButton* show = GTK_BUTTON(gtk_builder_get_object(builder, "show"));
-    GtkButton* save = GTK_BUTTON(gtk_builder_get_object(builder, "save"));
-    //GtkButton* resolve = GTK_BUTTON(gtk_builder_get_object(builder, "resolve"));
-    //GtkButton* network = GTK_BUTTON(gtk_builder_get_object(builder, "network"));
-    //GtkCheckButton* Auto = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "Auto"));
-    //GtkCheckButton* Manual = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "Manual"));
-    //GtkCheckButton* IA = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "IA"));
-    GtkCheckButton* bw = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "bw"));
-    GtkCheckButton* Grid = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "Grid"));
-    GtkImage *img = GTK_IMAGE(gtk_builder_get_object(builder, "img_sud"));
-    GtkButton* generate = GTK_BUTTON(gtk_builder_get_object(builder, "generate"));
-    GtkButton* web = GTK_BUTTON(gtk_builder_get_object(builder, "web"));
-    //GtkEntry* Rotation = GTK_ENTRY(gtk_builder_get_object(builder,"Rotation"));
-    GtkButton* Enter = GTK_BUTTON(gtk_builder_get_object(builder, "Enter"));
+double red = 0;
+double green = 0;
+double blue = 0;
 
-    /*App app =
+cairo_surface_t *surface;
+cairo_t *context;
+
+//static void do_drawing(cairo_t *cr);
+
+gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
+{
+    if (filename == NULL)
     {
-        .filename = "",
-	.is_rot = 0,
-	.is_resolve = 0,
-	.is_otsu = 0,
-	.is_generate = 0,
-        .pro_w = NULL,
-        .image_surface = NULL,
-        .dis_img = NULL,
-        .training_w = NULL,
-        .is_hough = 0,
-        .image = 
-	{ 
-	    .img = img,
-	    .rot_img = NULL,
-	    .otsu_img = NULL,
-	    .hough_img = NULL,
-	    .cases_img = NULL,
-	},
-        .ui =
+      
+      cairo_set_source_rgba(context, 0.5, 0.5, 0.1,1);
+      cairo_set_source_surface(context, surface, 0, 0);
+      //do_drawing(context);
+      cairo_paint(context);
+      return TRUE;
+    }
+    else
+    {
+    cairo_set_source_surface(context, glob.image, 0, 0);
+    cairo_paint(context);
+    return TRUE;
+    }
+    
+}
+size_t erased = 0;
+void return_draw()
+{
+    erased = 0;
+    filename = NULL;
+}
+
+void website_button()
+{
+    printf("Opening website...\n");
+    int a = system("xdg-open https://akaagi.github.io/Pinte_Website/accueil.html");
+    if (a)
+    {}
+}
+
+/*static gboolean on_draw(GtkWidget *da, GdkEvent *event, cairo_t* cr, gpointer data)
+{
+    (void)event; (void)data;
+    GdkPixbuf *pix;
+    GError *err = NULL;
+    pix = gdk_pixbuf_new_from_file("esfse", &err);
+    if(err)
+    {
+        printf("Error : %s\n", err->message);
+        g_error_free(err);
+        return FALSE;
+    }
+    //    cr = gdk_cairo_create (da->window);
+    gdk_cairo_set_source_pixbuf(cr, pix, 0, 0);
+    cairo_paint(cr);
+    //    cairo_fill (cr);
+    cairo_destroy (cr);
+    return FALSE;
+}*/
+
+/*static void do_drawing(cairo_t *cr)
+{
+  cairo_set_source_surface(cr, glob.image, 10, 10);
+  cairo_paint(cr);    
+}*/
+
+
+double mouseX;
+double mouseY;
+double previousX, previousY;
+int acc = 0;
+GdkRGBA couleur;
+
+
+void on_color1_color_set(GtkColorButton *cb)
+{
+    gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(cb), &couleur);
+    red = couleur.red;
+    green = couleur.green;
+    blue = couleur.blue;
+}
+
+void erase_white()
+{
+    erased = 1;
+}
+
+/*void value_changed(GtkRange *range, gpointer win) {
+    
+   size1 = gtk_range_get_value(range);
+   gchar *str = g_strdup_printf("%.f", size1);    
+   gtk_label_set_text(GTK_LABEL(win), str);
+   
+   g_free(str);
+}*/
+
+gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{   
+    if (erased == 0) 
+    {
+        if(GDK_BUTTON_PRESS)
         {
-            .window = window,
-            .load = load,
-	    .show = show,
-            .save = save,
-            .resolve = resolve,
-            .network = network,
-            .Rotation = Rotation,
-            .Enter = Enter,
-            .Auto = Auto,
-            .Manual = Manual,
-            .IA = IA,
-            .bw = bw,
-            .Grid = Grid,
-	    .Generate = generate,
-	    .web = web,
-        },
-    {*/
+            //printf("test\n");
+            cairo_t *context = cairo_create(surface);
+            cairo_set_line_width(context, size1);
 
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(Auto), TRUE);
 
-    Auto = GTK_CHECK_BUTTON(gtk_builder_get_object(builder, "Auto"));
+            if(acc != 0)
+            {
+                previousX = mouseX;
+                previousY = mouseY;
+            }
+            GdkEventMotion * e = (GdkEventMotion *) event;
+            if (acc == 0)
+            {
+                cairo_set_source_rgb(context, red, green, blue);
+                previousX = e->x;
+                previousY = e->y;
+                //cairo_translate(context, size1/2, size1/2);
+                //cairo_arc(context, previousX, previousY, size1, 0, 2*M_PI);
+                cairo_rectangle(context, previousX, previousY, size1, size1);
+                //cairo_fill_preserve(context);
 
-    gtk_widget_set_sensitive(GTK_WIDGET(Rotation), FALSE);
-    gtk_widget_set_sensitive(GTK_WIDGET(IA), FALSE);
-    gtk_widget_set_sensitive(GTK_WIDGET(bw), FALSE);
-    gtk_widget_set_sensitive(GTK_WIDGET(Grid), FALSE);
-    gtk_widget_set_sensitive(GTK_WIDGET(Enter), FALSE);
+            }
+            mouseX= e->x;
+            mouseY = e->y;
 
-    // Connects signal handlers.
-    //g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+            cairo_set_source_rgb(context, red, green, blue);
+            cairo_move_to(context, previousX, previousY);
+            cairo_line_to(context, mouseX, mouseY);
+            cairo_stroke(context);
+            acc = 1;
+
+
+            cairo_destroy(context);
+
+            gtk_widget_queue_draw_area(widget, 0, 0,
+                    gtk_widget_get_allocated_width(widget),
+                    gtk_widget_get_allocated_height(widget));
+            return TRUE;
+        }
+    }
+    else
+    {
+        if(GDK_BUTTON_PRESS)
+        {
+            //printf("test\n");
+            cairo_t *context = cairo_create(surface);
+            cairo_set_line_width(context, 10);
+
+
+            if(acc != 0)
+            {
+                previousX = mouseX;
+                previousY = mouseY;
+            }
+            GdkEventMotion * e = (GdkEventMotion *) event;
+            if (acc == 0)
+            {
+                cairo_set_source_rgb(context, 1, 1, 1);
+                previousX = e->x;
+                previousY = e->y;
+                //cairo_translate(context, size1/2, size1/2);
+                //cairo_arc(context, previousX, previousY, size1, 0, 2*M_PI);
+                cairo_rectangle(context, previousX, previousY, 10, 10);
+                //cairo_fill_preserve(context);
+
+            }
+            mouseX= e->x;
+            mouseY = e->y;
+
+
+            cairo_set_source_rgb(context, 1, 1, 1);
+            cairo_move_to(context, previousX, previousY);
+            cairo_line_to(context, mouseX, mouseY);
+            cairo_stroke(context);
+            acc = 1;
+
+
+            cairo_destroy(context);
+
+            gtk_widget_queue_draw_area(widget, 0, 0,
+                    gtk_widget_get_allocated_width(widget),
+                    gtk_widget_get_allocated_height(widget));
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+gboolean on_click_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+    //printf("ZIZOU2\n");
+    acc = 0;
+    return TRUE;
+}
+
+
+void create_window(GtkApplication *app, gpointer data)
+{
+    GtkWidget *window;
+    GtkWidget *drawarea;
+    GtkWidget *color1;
+    GtkButton *load;
+    GtkButton *pen;
+    GtkButton *erase;
+    GtkWidget *web;
+    //GtkWidget *hscale;
+
+    //glob.image = cairo_image_surface_create_from_png("pinte.png");
+
+    GtkBuilder *builder = gtk_builder_new_from_file("pinte.glade");
+    CHECK(builder)
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
+    CHECK(window)
+    drawarea = GTK_WIDGET(gtk_builder_get_object(builder, "drawarea"));
+    CHECK(drawarea)
+    color1 = GTK_WIDGET(gtk_builder_get_object(builder, "color1"));
+    CHECK(color1)
+    pen = GTK_BUTTON(gtk_builder_get_object(builder, "pen"));
+    CHECK(pen)
+    load = GTK_BUTTON(gtk_builder_get_object(builder, "load"));
+    CHECK(load)
+    erase = GTK_BUTTON(gtk_builder_get_object(builder, "erase"));
+    CHECK(erase)
+    web = GTK_WIDGET(gtk_builder_get_object(builder, "web"));
+    CHECK(web)
+    //hscale = GTK_WIDGET(gtk_builder_get_object(builder, "erase"));
+    //CHECK(hscale)
+
+
+    //g_signal_connect(G_OBJECT(drawarea), "draw",G_CALLBACK(on_draw_event), NULL); 
+
+    gtk_widget_add_events(drawarea, 
+            GDK_BUTTON_PRESS_MASK |
+            GDK_BUTTON_MOTION_MASK |
+            GDK_BUTTON_RELEASE_MASK);
     g_signal_connect(load, "clicked", G_CALLBACK(openfile), NULL);
-    //g_signal_connect(show, "clicked", G_CALLBACK(on_show), &app);
-    g_signal_connect(save, "clicked", G_CALLBACK(on_save), NULL);
-    //g_signal_connect(bw, "clicked", G_CALLBACK(BlackWhite), &app);
-    //g_signal_connect(web, "clicked", G_CALLBACK(open_website), &app);
-    //g_signal_connect(Enter,"clicked",G_CALLBACK(value_changed), &app);
+    g_signal_connect(pen, "clicked", G_CALLBACK(return_draw), NULL);
+    g_signal_connect(erase, "clicked", G_CALLBACK(erase_white), NULL);
+    g_signal_connect(drawarea, "button-press-event", G_CALLBACK(on_click), NULL); //blc
+    g_signal_connect(drawarea, "motion-notify-event", G_CALLBACK(on_click), NULL); //important
+    g_signal_connect(drawarea, "button-release-event", G_CALLBACK(on_click_release), NULL);
+    g_signal_connect(color1, "color-set", G_CALLBACK(on_color1_color_set), NULL);
+    g_signal_connect(G_OBJECT(drawarea), "draw", G_CALLBACK(on_draw), NULL);
+    g_signal_connect(web, "activate", G_CALLBACK(website_button), NULL);
+    //g_signal_connect(hscale, "value-changed", G_CALLBACK(value_changed), NULL); 
 
-    // Runs the main loop.
+
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+    gtk_widget_show_all(window);
+
+    surface = gdk_window_create_similar_surface(
+            gtk_widget_get_parent_window(drawarea),
+            CAIRO_CONTENT_COLOR,
+            gtk_widget_get_allocated_width(drawarea),
+            gtk_widget_get_allocated_height(drawarea));
+
+    //gtk_widget_set_app_paintable(drawarea, TRUE);
+
+    cairo_t *context = cairo_create(surface);
+    cairo_set_source_rgba(context, 1, 1, 1, 1);
+    cairo_paint(context);
+    cairo_destroy(context);
+
     gtk_main();
+}
 
-    /*SDL_FreeSurface(app.image_surface);
-    SDL_FreeSurface(app.dis_img);
-    SDL_FreeSurface(app.image.otsu_img);
-    SDL_FreeSurface(app.image.rot_img);*/
 
-    return 0;
+int main(int argc, char *argv[])
+{
+
+    GtkApplication *app;
+    app = gtk_application_new("test.test", G_APPLICATION_FLAGS_NONE);
+
+    g_signal_connect(app, "activate", G_CALLBACK(create_window), NULL);
+    int status= g_application_run(G_APPLICATION(app), argc, argv);
+
+    g_object_unref(app);
+
+    return status;
 }

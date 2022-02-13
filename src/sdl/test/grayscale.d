@@ -1,1 +1,0 @@
-grayscale.o: grayscale.c

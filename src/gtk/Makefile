@@ -11,7 +11,7 @@ EXE = main
 
 all: $(EXE)
 
-main: main.o tools.o
+main: main.o
 
 $(foreach f, $(EXE), $(eval $(f):))
 
