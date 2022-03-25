@@ -24,6 +24,34 @@ void savefile(GtkButton *button, gpointer user_data)
                 
 }
 
+void on_save(GtkButton *button, gpointer user_data)
+{
+    button=button;
+    GtkWidget* dialog;
+    GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(button));
+    dialog = gtk_file_chooser_dialog_new("Save Text ",
+        GTK_WINDOW(toplevel),
+        GTK_FILE_CHOOSER_ACTION_SAVE,
+        "Cancel", GTK_RESPONSE_CANCEL,
+        "Save", GTK_RESPONSE_ACCEPT,
+        NULL);
+    switch (gtk_dialog_run(GTK_DIALOG(dialog)))
+    {
+    case GTK_RESPONSE_ACCEPT:
+    {
+        gchar* filename;
+        filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        
+        gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+        break;
+    }
+    default:
+        break;
+    }
+    gtk_widget_destroy(dialog);
+    
+}
+
 void openfile(GtkButton *button, gpointer user_data)
 {
     button = button;
@@ -65,7 +93,9 @@ cairo_t *context;
 //static void do_drawing(cairo_t *cr);
 
 gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
-{
+{   
+    //surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+    
     if (filename == NULL)
     {
       
@@ -73,12 +103,15 @@ gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
       cairo_set_source_surface(context, surface, 0, 0);
       //do_drawing(context);
       cairo_paint(context);
+      surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+
       return TRUE;
     }
     else
     {
     cairo_set_source_surface(context, glob.image, 0, 0);
     cairo_paint(context);
+    surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
     return TRUE;
     }
     
@@ -152,6 +185,7 @@ void value_changed(GtkWidget *scale, gpointer user_data) {
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {   
+    
     if (erased == 0) 
     {
         if(GDK_BUTTON_PRESS)
@@ -317,7 +351,7 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(color1, "color-set", G_CALLBACK(on_color1_color_set), NULL);
     g_signal_connect(G_OBJECT(drawarea), "draw", G_CALLBACK(on_draw), NULL);
     g_signal_connect(web, "activate", G_CALLBACK(website_button), NULL);
-    g_signal_connect(save, "clicked", G_CALLBACK(savefile),NULL);
+    g_signal_connect(save, "clicked", G_CALLBACK(on_save),NULL);
     g_signal_connect(hscale, "value-changed", G_CALLBACK(value_changed), NULL); 
 
 
