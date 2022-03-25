@@ -15,14 +15,14 @@ struct {
 gchar filename1;
 const char* filename;
 GtkRange *range;
-gdouble size1 = 1;
+gdouble size1 =1;   
+GdkPixbuf *surface_pixbuf;
 
-/*void savefile(GtkButton *button, gpointer user_data, GtkWindow *window, int src_x, int src_y)
-{
-    GdkPixbuf *pixb = gdk_pixbuf_get_from_surface(window, 0, 0, 1920, 1080);
-    gdk_pixbuf_save (pixb, NULL, "jpeg", NULL, "quality", "100", NULL);
-
-}*/
+void savefile(GtkButton *button, gpointer user_data)
+{   
+    gdk_pixbuf_save (surface_pixbuf, "snapshot.png", "png", NULL, NULL);
+                
+}
 
 void openfile(GtkButton *button, gpointer user_data)
 {
@@ -157,6 +157,7 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
         if(GDK_BUTTON_PRESS)
         {
             //printf("test\n");
+            
             cairo_t *context = cairo_create(surface);
             cairo_set_line_width(context, size1);
 
@@ -165,6 +166,9 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
             {
                 previousX = mouseX;
                 previousY = mouseY;
+                surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+                //gdk_pixbuf_save (surface_pixbuf, "snapshot.png", "png", NULL, NULL);
+                
             }
             GdkEventMotion * e = (GdkEventMotion *) event;
             if (acc == 0)
@@ -174,10 +178,12 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
                 previousY = e->y;
                 //cairo_translate(context, size1/2, size1/2);
                 //cairo_arc(context, previousX, previousY, size1, 0, 2*M_PI);
-                cairo_rectangle(context, previousX, previousY, size1, size1);
+                cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
                 //cairo_fill_preserve(context);
-
+                
             }
+
+
             mouseX= e->x;
             mouseY = e->y;
 
@@ -194,6 +200,8 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
             gtk_widget_queue_draw_area(widget, 0, 0,
                     gtk_widget_get_allocated_width(widget),
                     gtk_widget_get_allocated_height(widget));
+            
+           
             return TRUE;
         }
     }
@@ -239,6 +247,8 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
             gtk_widget_queue_draw_area(widget, 0, 0,
                     gtk_widget_get_allocated_width(widget),
                     gtk_widget_get_allocated_height(widget));
+            
+            
             return TRUE;
         }
     }
@@ -262,7 +272,7 @@ void create_window(GtkApplication *app, gpointer data)
     GtkButton *pen;
     GtkButton *erase;
     GtkWidget *web;
-    //GtkButton *save;
+    GtkButton *save;
     GtkWidget *hscale;
     GtkPaned *grid;
 
@@ -285,10 +295,10 @@ void create_window(GtkApplication *app, gpointer data)
     web = GTK_WIDGET(gtk_builder_get_object(builder, "web"));
     CHECK(web)
     grid = GTK_PANED(gtk_builder_get_object(builder, "grid"));
-    hscale = GTK_WIDGET(gtk_builder_get_object(builder, "erase"));
-    CHECK(hscale)
-    //save = GTK_BUTTON(gtk_builder_get_object(builder, "save"));
-    //CHECK(save)
+    //hscale = GTK_WIDGET(gtk_builder_get_object(builder, "erase"));
+    //CHECK(hscale)
+    save = GTK_BUTTON(gtk_builder_get_object(builder, "save"));
+    CHECK(save)
     hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
     gtk_container_add(GTK_CONTAINER(grid), hscale);
 
@@ -307,7 +317,7 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(color1, "color-set", G_CALLBACK(on_color1_color_set), NULL);
     g_signal_connect(G_OBJECT(drawarea), "draw", G_CALLBACK(on_draw), NULL);
     g_signal_connect(web, "activate", G_CALLBACK(website_button), NULL);
-    //g_signal_connect(save, "clicked", G_CALLBACK(savefile), NULL);
+    g_signal_connect(save, "clicked", G_CALLBACK(savefile),NULL);
     g_signal_connect(hscale, "value-changed", G_CALLBACK(value_changed), NULL); 
 
 
