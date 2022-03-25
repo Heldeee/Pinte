@@ -17,7 +17,12 @@ const char* filename;
 GtkRange *range;
 gdouble size1 = 1;
 
+/*void savefile(GtkButton *button, gpointer user_data, GtkWindow *window, int src_x, int src_y)
+{
+    GdkPixbuf *pixb = gdk_pixbuf_get_from_surface(window, 0, 0, 1920, 1080);
+    gdk_pixbuf_save (pixb, NULL, "jpeg", NULL, "quality", "100", NULL);
 
+}*/
 
 void openfile(GtkButton *button, gpointer user_data)
 {
@@ -126,7 +131,6 @@ double previousX, previousY;
 int acc = 0;
 GdkRGBA couleur;
 
-
 void on_color1_color_set(GtkColorButton *cb)
 {
     gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(cb), &couleur);
@@ -140,14 +144,11 @@ void erase_white()
     erased = 1;
 }
 
-/*void value_changed(GtkRange *range, gpointer win) {
+void value_changed(GtkWidget *scale, gpointer user_data) {
     
-   size1 = gtk_range_get_value(range);
-   gchar *str = g_strdup_printf("%.f", size1);    
-   gtk_label_set_text(GTK_LABEL(win), str);
+   size1 = gtk_range_get_value(GTK_RANGE(scale));
    
-   g_free(str);
-}*/
+}
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {   
@@ -261,9 +262,11 @@ void create_window(GtkApplication *app, gpointer data)
     GtkButton *pen;
     GtkButton *erase;
     GtkWidget *web;
-    //GtkWidget *hscale;
+    //GtkButton *save;
+    GtkWidget *hscale;
+    GtkPaned *grid;
 
-    //glob.image = cairo_image_surface_create_from_png("pinte.png");
+    GtkAdjustment* adjustement = gtk_adjustment_new(1.0,0.0,10.0,1.0,1.0, 0.0);
 
     GtkBuilder *builder = gtk_builder_new_from_file("pinte.glade");
     CHECK(builder)
@@ -281,9 +284,13 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(erase)
     web = GTK_WIDGET(gtk_builder_get_object(builder, "web"));
     CHECK(web)
-    //hscale = GTK_WIDGET(gtk_builder_get_object(builder, "erase"));
-    //CHECK(hscale)
-
+    grid = GTK_PANED(gtk_builder_get_object(builder, "grid"));
+    hscale = GTK_WIDGET(gtk_builder_get_object(builder, "erase"));
+    CHECK(hscale)
+    //save = GTK_BUTTON(gtk_builder_get_object(builder, "save"));
+    //CHECK(save)
+    hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
+    gtk_container_add(GTK_CONTAINER(grid), hscale);
 
     //g_signal_connect(G_OBJECT(drawarea), "draw",G_CALLBACK(on_draw_event), NULL); 
 
@@ -300,7 +307,8 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(color1, "color-set", G_CALLBACK(on_color1_color_set), NULL);
     g_signal_connect(G_OBJECT(drawarea), "draw", G_CALLBACK(on_draw), NULL);
     g_signal_connect(web, "activate", G_CALLBACK(website_button), NULL);
-    //g_signal_connect(hscale, "value-changed", G_CALLBACK(value_changed), NULL); 
+    //g_signal_connect(save, "clicked", G_CALLBACK(savefile), NULL);
+    g_signal_connect(hscale, "value-changed", G_CALLBACK(value_changed), NULL); 
 
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
