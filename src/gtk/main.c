@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include <math.h>
+#include "app_ds.h"
 
 #define CHECK(pointer) \
         if(pointer == NULL) \
@@ -17,11 +18,15 @@ const char* filename;
 GtkRange *range;
 gdouble size1 =1;   
 GdkPixbuf *surface_pixbuf;
+GdkPixbuf *redo;
+struct Stack *undo;
+cairo_surface_t *surface;
+cairo_t *context;
+double start_click = 0;
 
 void savefile(GtkButton *button, gpointer user_data)
 {   
-    gdk_pixbuf_save (surface_pixbuf, "snapshot.png", "png", NULL, NULL);
-                
+    gdk_pixbuf_save (surface_pixbuf, "snapshot.png", "png", NULL, NULL);     
 }
 
 void on_save(GtkButton *button, gpointer user_data)
@@ -50,6 +55,34 @@ void on_save(GtkButton *button, gpointer user_data)
     }
     gtk_widget_destroy(dialog);
     
+}
+
+gboolean ctrl_z(GtkWidget* widget)
+{
+/*
+	This event handler is for ctrl+w, ctrl+y, ctrl+z operatins on the window.
+	It is defined over here as it affects the sheet.
+*/
+	if(!is_empty_stack(undo))
+        {
+		redo = gdk_pixbuf_copy(surface_pixbuf);
+		surface_pixbuf = gdk_pixbuf_copy(pop_stack(&undo));
+                surface = gdk_cairo_surface_create_from_pixbuf (surface_pixbuf, 1, NULL);
+                context = cairo_create(surface);
+                cairo_set_source_surface(context, surface, 0, 0);
+                printf("ctrl z\n");
+	}
+
+        return TRUE;	    
+}
+
+gboolean ctrl_y(GtkWidget* widget)
+{
+	undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+        surface_pixbuf = gdk_pixbuf_copy(redo);
+        surface = gdk_cairo_surface_create_from_pixbuf (surface_pixbuf, 1, NULL);
+        printf("ctrl y\n");
+	return TRUE;
 }
 
 void openfile(GtkButton *button, gpointer user_data)
@@ -87,8 +120,7 @@ double red = 0;
 double green = 0;
 double blue = 0;
 
-cairo_surface_t *surface;
-cairo_t *context;
+
 
 //static void do_drawing(cairo_t *cr);
 
@@ -98,13 +130,11 @@ gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
     
     if (filename == NULL)
     {
-      
       cairo_set_source_rgba(context, 0.5, 0.5, 0.1,1);
       cairo_set_source_surface(context, surface, 0, 0);
       //do_drawing(context);
       cairo_paint(context);
       surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
-
       return TRUE;
     }
     else
@@ -126,7 +156,7 @@ void return_draw()
 void website_button()
 {
     printf("Opening website...\n");
-    int a = system("xdg-open https://akaagi.github.io/Pinte_Website/accueil.html");
+    int a = system("xdg-open https://akaagi.github.io/Pinte_Website/accueil.html &");
     if (a)
     {}
 }
@@ -185,14 +215,18 @@ void value_changed(GtkWidget *scale, gpointer user_data) {
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {   
-    
     if (erased == 0) 
     {
+        cairo_t *context = cairo_create(surface);
+
         if(GDK_BUTTON_PRESS)
         {
+            if (start_click == 1)
+            {
+              undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+              start_click = 0;
+            }
             //printf("test\n");
-            
-            cairo_t *context = cairo_create(surface);
             cairo_set_line_width(context, size1);
 
 
@@ -200,7 +234,7 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
             {
                 previousX = mouseX;
                 previousY = mouseY;
-                surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+                surface_pixbuf = gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
                 //gdk_pixbuf_save (surface_pixbuf, "snapshot.png", "png", NULL, NULL);
                 
             }
@@ -243,6 +277,12 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
     {
         if(GDK_BUTTON_PRESS)
         {
+             if (start_click == 1)
+            {
+              undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+              start_click = 0;
+            }
+
             //printf("test\n");
             cairo_t *context = cairo_create(surface);
             cairo_set_line_width(context, 10);
@@ -252,6 +292,7 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
             {
                 previousX = mouseX;
                 previousY = mouseY;
+                surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
             }
             GdkEventMotion * e = (GdkEventMotion *) event;
             if (acc == 0)
@@ -291,14 +332,16 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 
 gboolean on_click_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
-    //printf("ZIZOU2\n");
+    printf("in stack\n");
     acc = 0;
+    start_click = 1;
     return TRUE;
 }
 
 
 void create_window(GtkApplication *app, gpointer data)
 {
+
     GtkWidget *window;
     GtkWidget *drawarea;
     GtkWidget *color1;
@@ -309,6 +352,8 @@ void create_window(GtkApplication *app, gpointer data)
     GtkButton *save;
     GtkWidget *hscale;
     GtkPaned *grid;
+    GtkButton *retour;
+    GtkButton *annul;
 
     GtkAdjustment* adjustement = gtk_adjustment_new(1.0,0.0,10.0,1.0,1.0, 0.0);
 
@@ -333,6 +378,11 @@ void create_window(GtkApplication *app, gpointer data)
     //CHECK(hscale)
     save = GTK_BUTTON(gtk_builder_get_object(builder, "save"));
     CHECK(save)
+    retour = GTK_BUTTON(gtk_builder_get_object(builder, "return"));
+    CHECK(retour)
+    annul = GTK_BUTTON(gtk_builder_get_object(builder, "cancel"));
+    CHECK(annul)
+
     hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
     gtk_container_add(GTK_CONTAINER(grid), hscale);
 
@@ -341,7 +391,8 @@ void create_window(GtkApplication *app, gpointer data)
     gtk_widget_add_events(drawarea, 
             GDK_BUTTON_PRESS_MASK |
             GDK_BUTTON_MOTION_MASK |
-            GDK_BUTTON_RELEASE_MASK);
+            GDK_BUTTON_RELEASE_MASK |
+            GDK_KEY_PRESS_MASK);
     g_signal_connect(load, "clicked", G_CALLBACK(openfile), NULL);
     g_signal_connect(pen, "clicked", G_CALLBACK(return_draw), NULL);
     g_signal_connect(erase, "clicked", G_CALLBACK(erase_white), NULL);
@@ -352,7 +403,9 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(G_OBJECT(drawarea), "draw", G_CALLBACK(on_draw), NULL);
     g_signal_connect(web, "activate", G_CALLBACK(website_button), NULL);
     g_signal_connect(save, "clicked", G_CALLBACK(on_save),NULL);
-    g_signal_connect(hscale, "value-changed", G_CALLBACK(value_changed), NULL); 
+    g_signal_connect(hscale, "value-changed", G_CALLBACK(value_changed), NULL);
+    g_signal_connect(retour, "clicked", G_CALLBACK(ctrl_z), NULL);
+    g_signal_connect(annul, "clicked", G_CALLBACK(ctrl_y), NULL);
 
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
@@ -369,8 +422,10 @@ void create_window(GtkApplication *app, gpointer data)
     cairo_t *context = cairo_create(surface);
     cairo_set_source_rgba(context, 1, 1, 1, 1);
     cairo_paint(context);
+    surface_pixbuf = gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(drawarea),gtk_widget_get_allocated_height(drawarea));
+    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
     cairo_destroy(context);
-
+    
     gtk_main();
 }
 
@@ -380,7 +435,6 @@ int main(int argc, char *argv[])
 
     GtkApplication *app;
     app = gtk_application_new("test.test", G_APPLICATION_FLAGS_NONE);
-
     g_signal_connect(app, "activate", G_CALLBACK(create_window), NULL);
     int status= g_application_run(G_APPLICATION(app), argc, argv);
 

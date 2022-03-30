@@ -383,38 +383,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkPaned">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <child>
-                      <object class="GtkButton" id="return">
-                        <property name="label" translatable="yes">Return</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">True</property>
-                      </object>
-                      <packing>
-                        <property name="resize">False</property>
-                        <property name="shrink">True</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="cancel">
-                        <property name="label" translatable="yes">Cancel</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
-                        <property name="receives-default">True</property>
-                      </object>
-                      <packing>
-                        <property name="resize">True</property>
-                        <property name="shrink">True</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">1</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
                   <placeholder/>

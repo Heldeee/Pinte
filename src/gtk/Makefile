@@ -11,7 +11,7 @@ EXE = main
 
 all: $(EXE)
 
-main: main.o
+main: main.o app_ds.o
 
 $(foreach f, $(EXE), $(eval $(f):))
 
