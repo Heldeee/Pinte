@@ -146,11 +146,16 @@ gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
     }
     
 }
+size_t rectangled = 0;
+size_t cheat_bucket = 1;
+size_t bucketed = 0;
 size_t erased = 0;
 void return_draw()
 {
-    erased = 0;
-    filename = NULL;
+  rectangled = 0;
+  bucketed = 0;
+  erased = 0;
+  filename = NULL;
 }
 
 void website_button()
@@ -204,7 +209,9 @@ void on_color1_color_set(GtkColorButton *cb)
 
 void erase_white()
 {
-    erased = 1;
+  rectangled = 0;
+  bucketed = 0;
+  erased = 1;
 }
 
 void value_changed(GtkWidget *scale, gpointer user_data) {
@@ -213,9 +220,258 @@ void value_changed(GtkWidget *scale, gpointer user_data) {
    
 }
 
+void flood_fill()
+{
+  erased = 0;
+  rectangled = 0;
+  bucketed = 1;
+}
+
+void get_rect()
+{
+  erased = 0;
+  bucketed = 0;
+  rectangled = 1;
+}
+
+//rectangle temporaire pour test le bucket
+void draw_rectangle()
+{
+  cairo_t *cr = cairo_create(surface);
+  cairo_set_source_rgb(cr, red, green, blue);
+  cairo_set_line_width(cr, 5);
+  int left_X = 10;
+  int right_X = 50;
+  int top_Y = 10;
+  int bot_Y = 50;
+  cairo_move_to(cr, left_X, bot_Y);
+  cairo_line_to(cr, right_X, bot_Y);
+  cairo_stroke(cr);
+
+  cairo_move_to(cr, left_X, top_Y);
+  cairo_line_to(cr, right_X, top_Y);
+  cairo_stroke(cr);
+
+  cairo_move_to(cr, left_X, bot_Y+2);
+  cairo_line_to(cr, left_X, top_Y-2);
+  cairo_stroke(cr);
+
+  cairo_move_to(cr, right_X, bot_Y+2);
+  cairo_line_to(cr, right_X, top_Y-2);
+  cairo_stroke(cr);
+}
+
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
-{   
-    if (erased == 0) 
+{
+  if (rectangled == 1)
+    {
+      draw_rectangle();
+    }
+  else if (bucketed == 1)
+    {
+      if (cheat_bucket == 1)
+	{
+	  if(GDK_BUTTON_PRESS)
+	    {
+	      cairo_t *context = cairo_create(surface);
+	      cairo_set_line_width(context, 1);
+
+	      if(acc != 0)
+		{
+		  previousX = mouseX;
+		  previousY = mouseY;
+		  surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		}
+	      GdkEventMotion * e = (GdkEventMotion *) event;
+	      if (acc == 0)
+		{
+		  cairo_set_source_rgb(context, red, green, blue);
+		  previousX = e->x;
+		  previousY = e->y;
+		  double tmpX = previousX;
+		  double tmpY = previousY;
+		  while (previousX < gtk_widget_get_allocated_width(widget))
+		    {
+		      while (previousY < gtk_widget_get_allocated_height(widget))
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY += 1;
+			}
+		      previousY = tmpY-1;
+		      while (previousY > 0)
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY -= 1;
+			}
+		      previousX += 1;
+		      previousY = tmpY;
+		    }
+		  previousX = tmpX;
+		  while (previousX > 0)
+		    {
+		      while (previousY < gtk_widget_get_allocated_height(widget))
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY += 1;
+			}
+		      previousY -= 1;
+		      while (previousY > 0)
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY -= 1;
+			}
+		      previousX -= 1;
+		      previousY = tmpY;
+		    }
+		}
+	      mouseX= e->x;
+	      mouseY = e->y;
+
+	      //cairo_set_source_rgb(context, , 0.5, 0.5);
+	      cairo_stroke(context);
+
+	      cairo_destroy(context);
+
+	      gtk_widget_queue_draw_area(widget, 0, 0,
+					 gtk_widget_get_allocated_width(widget),
+					 gtk_widget_get_allocated_height(widget));
+	      cheat_bucket = 0;
+	      return TRUE;
+	    }
+	}
+      else if(GDK_BUTTON_PRESS)
+	{
+	  cairo_t *context = cairo_create(surface);
+	  cairo_set_line_width(context, 1);
+
+	  if(acc != 0)
+            {
+	      previousX = mouseX;
+	      previousY = mouseY;
+	      surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+            }
+	  GdkEventMotion * e = (GdkEventMotion *) event;
+	  if (acc == 0)
+            {
+	      cairo_set_source_rgb(context, red, green, blue);
+	      previousX = e->x;
+	      previousY = e->y;
+	      double tmpX = previousX;
+	      double tmpY = previousY;
+	      guchar *origine = gdk_pixbuf_get_pixels(surface_pixbuf);
+	      guchar *pixel;
+	      while (previousX < gtk_widget_get_allocated_width(widget))
+		{
+		  surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		  pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
+		  if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
+		    {
+		      cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+		    }
+		  else
+		    {			cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+		      break;
+		    }
+		  while (previousY < gtk_widget_get_allocated_height(widget))
+		    {
+		      surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		      pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
+		      if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY += 1;
+			}
+		      else
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  break;
+			}
+		    }
+		  previousY = tmpY-1;
+		  while (previousY > 0)
+		    {
+		      surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		      pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
+		      if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY -= 1;
+			}
+		      else
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  break;
+			}
+		    }
+		  previousX += 1;
+		  previousY = tmpY;
+		}
+	      previousX = tmpX;
+	      previousY = tmpY;
+	      while (previousX > 0)
+		{
+		  surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		  pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
+		  if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
+		    {
+		      cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+		    }
+		  else
+		    {
+		      cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+		      break;
+		    }
+		  while (previousY < gtk_widget_get_allocated_height(widget))
+		    {
+		      surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		      pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
+		      if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY += 1;
+			}
+		      else
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  break;
+			}
+		    }
+		  previousY -= 1;
+		  while (previousY > 0)
+		    {
+		      surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		      pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
+		      if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY -= 1;
+			}
+		      else
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  break;
+			}
+		    }
+		  previousX -= 1;
+		  previousY = tmpY;
+		}
+            }
+	  mouseX= e->x;
+	  mouseY = e->y;
+
+	  //cairo_set_source_rgb(context, , 0.5, 0.5);
+	  cairo_stroke(context);
+
+	  cairo_destroy(context);
+
+	  gtk_widget_queue_draw_area(widget, 0, 0,
+				     gtk_widget_get_allocated_width(widget),
+				     gtk_widget_get_allocated_height(widget));
+            
+	  return TRUE;
+	}
+    }
+  else if (erased == 0) 
     {
         cairo_t *context = cairo_create(surface);
 
@@ -354,6 +610,8 @@ void create_window(GtkApplication *app, gpointer data)
     GtkPaned *grid;
     GtkButton *retour;
     GtkButton *annul;
+    GtkButton *bucket;
+    GtkButton *rect;
 
     GtkAdjustment* adjustement = gtk_adjustment_new(1.0,0.0,10.0,1.0,1.0, 0.0);
 
@@ -382,6 +640,11 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(retour)
     annul = GTK_BUTTON(gtk_builder_get_object(builder, "cancel"));
     CHECK(annul)
+    bucket = GTK_BUTTON(gtk_builder_get_object(builder, "bucket"));
+    CHECK(bucket)
+    rect =  GTK_BUTTON(gtk_builder_get_object(builder, "rectangle"));
+    CHECK(rect)
+		
 
     hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
     gtk_container_add(GTK_CONTAINER(grid), hscale);
@@ -396,6 +659,8 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(load, "clicked", G_CALLBACK(openfile), NULL);
     g_signal_connect(pen, "clicked", G_CALLBACK(return_draw), NULL);
     g_signal_connect(erase, "clicked", G_CALLBACK(erase_white), NULL);
+    g_signal_connect(bucket, "clicked", G_CALLBACK(flood_fill), NULL);
+    g_signal_connect(rect, "clicked", G_CALLBACK(get_rect), NULL);
     g_signal_connect(drawarea, "button-press-event", G_CALLBACK(on_click), NULL); //blc
     g_signal_connect(drawarea, "motion-notify-event", G_CALLBACK(on_click), NULL); //important
     g_signal_connect(drawarea, "button-release-event", G_CALLBACK(on_click_release), NULL);
