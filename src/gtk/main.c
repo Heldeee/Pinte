@@ -3,6 +3,8 @@
 #include <gtk/gtk.h>
 #include <math.h>
 #include "app_ds.h"
+#include "savepng.h"
+#include "../sdl/filter/filtre.h"
 
 #define CHECK(pointer) \
         if(pointer == NULL) \
@@ -24,6 +26,10 @@ cairo_surface_t *surface;
 cairo_t *context;
 double start_click = 0;
 GtkWidget* window;
+
+
+
+
 
 void savefile(GtkButton *button, gpointer user_data)
 {   
@@ -71,7 +77,6 @@ gboolean ctrl_z(GtkWidget* widget)
     surface = gdk_cairo_surface_create_from_pixbuf (surface_pixbuf, 1, NULL);
     context = cairo_create(surface);
     cairo_set_source_surface(context, surface, 0, 0);
-    printf("ctrl z\n");
 	}
 
         return TRUE;	    
@@ -82,7 +87,6 @@ gboolean ctrl_y(GtkWidget* widget)
 	undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
   surface_pixbuf = gdk_pixbuf_copy(redo);
   surface = gdk_cairo_surface_create_from_pixbuf (surface_pixbuf, 1, NULL);
-  printf("ctrl y\n");
 	return TRUE;
 }
 
@@ -629,7 +633,6 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 
 gboolean on_click_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
-    printf("in stack\n");
     acc = 0;
     start_click = 1;
     return TRUE;
@@ -663,6 +666,160 @@ gboolean loadblank(GtkWidget* widget)
   return TRUE;
 }
 
+gboolean grey(GtkWidget *widget)
+{
+    char* filename = ".temp_filter";
+    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+    init_sdl();
+    SDL_Surface *image = load_image(filename);
+    
+    __grayscale(image);
+
+    SDL_Surface *bmp = image;
+    SDL_SavePNG(bmp, filename);
+    SDL_FreeSurface(image);
+
+    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+    glob.image = cairo_image_surface_create_from_png(filename);
+    surface = glob.image;
+    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+
+    return TRUE;
+}
+
+gboolean invert(GtkWidget *widget)
+{
+    char* filename = ".temp_filter";
+    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+    init_sdl();
+    SDL_Surface *image = load_image(filename);
+    
+    __negative(image);
+
+    SDL_Surface *bmp = image;
+    SDL_SavePNG(bmp, filename);
+    SDL_FreeSurface(image);
+
+    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+    glob.image = cairo_image_surface_create_from_png(filename);
+    surface = glob.image;
+    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+
+    return TRUE;
+}
+
+gboolean cyann(GtkWidget *widget)
+{
+    char* filename = ".temp_filter";
+    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+    init_sdl();
+    SDL_Surface *image = load_image(filename);
+    
+    __cyan(image);
+
+    SDL_Surface *bmp = image;
+    SDL_SavePNG(bmp, filename);
+    SDL_FreeSurface(image);
+
+    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+    glob.image = cairo_image_surface_create_from_png(filename);
+    surface = glob.image;
+    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+
+    return TRUE;
+}
+
+gboolean rosee(GtkWidget *widget)
+{
+    char* filename = ".temp_filter";
+    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+    init_sdl();
+    SDL_Surface *image = load_image(filename);
+    
+    __rose(image);
+
+    SDL_Surface *bmp = image;
+    SDL_SavePNG(bmp, filename);
+    SDL_FreeSurface(image);
+
+    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+    glob.image = cairo_image_surface_create_from_png(filename);
+    surface = glob.image;
+    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+
+    return TRUE;
+}
+gboolean yelloww(GtkWidget *widget)
+{
+    char* filename = ".temp_filter";
+    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+    init_sdl();
+    SDL_Surface *image = load_image(filename);
+    
+    __yellow(image);
+
+    SDL_Surface *bmp = image;
+    SDL_SavePNG(bmp, filename);
+    SDL_FreeSurface(image);
+
+    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+    glob.image = cairo_image_surface_create_from_png(filename);
+    surface = glob.image;
+    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+
+    return TRUE;
+}
+
+gboolean BAW(GtkWidget *widget)
+{
+    char* filename = ".temp_filter";
+    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+    init_sdl();
+    SDL_Surface *image = load_image(filename);
+    
+    __blackandwhite(image);
+
+    SDL_Surface *bmp = image;
+    SDL_SavePNG(bmp, filename);
+    SDL_FreeSurface(image);
+
+    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+    glob.image = cairo_image_surface_create_from_png(filename);
+    surface = glob.image;
+    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+
+    return TRUE;
+}
+
+gboolean mirrorr(GtkWidget *widget)
+{
+    char* filename = ".temp_filter";
+    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+    init_sdl();
+    SDL_Surface *image = load_image(filename);
+    
+    __mirror(image);
+
+    SDL_Surface *bmp = image;
+    SDL_SavePNG(bmp, filename);
+    SDL_FreeSurface(image);
+
+    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+    glob.image = cairo_image_surface_create_from_png(filename);
+    surface = glob.image;
+    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+
+    return TRUE;
+}
+
+
 
 void create_window(GtkApplication *app, gpointer data)
 {
@@ -682,6 +839,15 @@ void create_window(GtkApplication *app, gpointer data)
     GtkButton *bucket;
     GtkButton *rect;
     GtkWidget *new;
+    
+    //FILTERS
+    GtkWidget *filter1;
+    GtkWidget *filter2;
+    GtkWidget *filter3;
+    GtkWidget *filter4;
+    GtkWidget *filter5;
+    GtkWidget *filter6;
+    GtkWidget *filter7;
 
     GtkAdjustment* adjustement = gtk_adjustment_new(1.0,0.0,10.0,1.0,1.0, 0.0);
 
@@ -703,8 +869,6 @@ void create_window(GtkApplication *app, gpointer data)
     web = GTK_WIDGET(gtk_builder_get_object(builder, "web"));
     CHECK(web)
     grid = GTK_PANED(gtk_builder_get_object(builder, "grid"));
-    //hscale = GTK_WIDGET(gtk_builder_get_object(builder, "erase"));
-    //CHECK(hscale)
     save = GTK_BUTTON(gtk_builder_get_object(builder, "save"));
     CHECK(save)
     retour = GTK_BUTTON(gtk_builder_get_object(builder, "return"));
@@ -717,6 +881,21 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(rect)
     new = GTK_WIDGET(gtk_builder_get_object(builder, "new"));
     CHECK(new)
+    //FILTERS
+    filter1 = GTK_WIDGET(gtk_builder_get_object(builder, "filter1"));
+    CHECK(filter1)
+    filter2 = GTK_WIDGET(gtk_builder_get_object(builder, "filter2"));
+    CHECK(filter2)
+    filter3 = GTK_WIDGET(gtk_builder_get_object(builder, "filter3"));
+    CHECK(filter3)
+    filter4 = GTK_WIDGET(gtk_builder_get_object(builder, "filter4"));
+    CHECK(filter4)
+    filter5 = GTK_WIDGET(gtk_builder_get_object(builder, "filter5"));
+    CHECK(filter5)
+    filter6 = GTK_WIDGET(gtk_builder_get_object(builder, "filter6"));
+    CHECK(filter6)
+    filter7 = GTK_WIDGET(gtk_builder_get_object(builder, "filter7"));
+    CHECK(filter7)
 		
 
     hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
@@ -750,7 +929,15 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(annul, "clicked", G_CALLBACK(ctrl_y), NULL);
     g_signal_connect(gtk_widget_get_toplevel (drawarea), "button-release-event", G_CALLBACK(refresh), NULL);
     g_signal_connect(new, "activate", G_CALLBACK(loadblank), NULL);
-
+    //FILTERS
+    g_signal_connect(filter1, "activate", G_CALLBACK(grey), NULL);
+    g_signal_connect(filter2, "activate", G_CALLBACK(invert), NULL);
+    g_signal_connect(filter3, "activate", G_CALLBACK(cyann), NULL);
+    g_signal_connect(filter4, "activate", G_CALLBACK(rosee), NULL);
+    g_signal_connect(filter5, "activate", G_CALLBACK(yelloww), NULL);
+    g_signal_connect(filter6, "activate", G_CALLBACK(BAW), NULL);
+    g_signal_connect(filter7, "activate", G_CALLBACK(mirrorr), NULL);
+    
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_widget_show_all(window);
 

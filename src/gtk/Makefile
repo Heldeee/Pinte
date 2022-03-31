@@ -5,13 +5,13 @@ CC = gcc
 
 CPPFLAGS= `pkg-config --cflags sdl` -MMD
 CFLAGS = `pkg-config --cflags gtk+-3.0` -Wall -O3
-LDLIBS = `pkg-config --libs gtk+-3.0` `pkg-config --libs sdl` -lSDL_image -lSDL_gfx -lm
+LDLIBS = `pkg-config --libs gtk+-3.0` `pkg-config --libs sdl` -lSDL_image -lSDL_gfx -lm -lpng
 
 EXE = main
 
 all: $(EXE)
 
-main: main.o app_ds.o
+main: main.o app_ds.o savepng.o filtre.o
 
 $(foreach f, $(EXE), $(eval $(f):))
 
