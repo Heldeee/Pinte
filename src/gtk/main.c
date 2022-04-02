@@ -30,7 +30,6 @@ GtkWidget* window;
 
 
 
-
 void savefile(GtkButton *button, gpointer user_data)
 {   
     gdk_pixbuf_save (surface_pixbuf, "snapshot.png", "png", NULL, NULL);     
@@ -834,12 +833,12 @@ void create_window(GtkApplication *app, gpointer data)
     GtkWidget *save;
     GtkWidget *hscale;
     GtkPaned *grid;
-    GtkWidget *retour;
-    GtkWidget *annul;
+    GtkButton *retour;
+    GtkButton *annul;
     GtkButton *bucket;
     GtkButton *rect;
     GtkWidget *new;
-
+    GtkWidget *menu;
     //FILTERS
     GtkWidget *filter1;
     GtkWidget *filter2;
@@ -868,12 +867,15 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(erase)
         web = GTK_WIDGET(gtk_builder_get_object(builder, "web"));
     CHECK(web)
+        menu = GTK_WIDGET(gtk_builder_get_object(builder, "menu"));
+    CHECK(menu)
+
         grid = GTK_PANED(gtk_builder_get_object(builder, "grid"));
     save = GTK_WIDGET(gtk_builder_get_object(builder, "save"));
     CHECK(save)
-        retour = GTK_WIDGET(gtk_builder_get_object(builder, "return"));
+        retour = GTK_BUTTON(gtk_builder_get_object(builder, "return"));
     CHECK(retour)
-        annul = GTK_WIDGET(gtk_builder_get_object(builder, "cancel"));
+        annul = GTK_BUTTON(gtk_builder_get_object(builder, "cancel"));
     CHECK(annul)
         bucket = GTK_BUTTON(gtk_builder_get_object(builder, "bucket"));
     CHECK(bucket)
@@ -925,9 +927,11 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(web, "activate", G_CALLBACK(website_button), NULL);
     g_signal_connect(save, "activate", G_CALLBACK(on_save),NULL);
     g_signal_connect(hscale, "value-changed", G_CALLBACK(value_changed), NULL);
-    g_signal_connect(retour, "activate", G_CALLBACK(ctrl_z), NULL);
-    g_signal_connect(annul, "activate", G_CALLBACK(ctrl_y), NULL);
+    g_signal_connect(retour, "clicked", G_CALLBACK(ctrl_z), NULL);
+    g_signal_connect(annul, "clicked", G_CALLBACK(ctrl_y), NULL);
     g_signal_connect(gtk_widget_get_toplevel (drawarea), "button-release-event", G_CALLBACK(refresh), NULL);
+    g_signal_connect(gtk_widget_get_toplevel(menu), "button-release-event", G_CALLBACK(refresh), NULL);
+ 
     g_signal_connect(new, "activate", G_CALLBACK(loadblank), NULL);
     //FILTERS
     g_signal_connect(filter1, "activate", G_CALLBACK(grey), NULL);
