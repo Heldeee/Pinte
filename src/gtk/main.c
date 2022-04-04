@@ -3,15 +3,13 @@
 #include <gtk/gtk.h>
 #include <math.h>
 #include "app_ds.h"
-#include "savepng.h"
-#include "../sdl/filter/filtre.h"
 
 #define CHECK(pointer) \
-    if(pointer == NULL) \
-    exit(1);
+        if(pointer == NULL) \
+            exit(1);
 
 struct {
-    cairo_surface_t *image;  
+  cairo_surface_t *image;  
 } glob;
 
 
@@ -25,10 +23,6 @@ struct Stack *undo;
 cairo_surface_t *surface;
 cairo_t *context;
 double start_click = 0;
-GtkWidget* window;
-
-
-
 
 void savefile(GtkButton *button, gpointer user_data)
 {   
@@ -41,94 +35,83 @@ void on_save(GtkButton *button, gpointer user_data)
     GtkWidget* dialog;
     GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(button));
     dialog = gtk_file_chooser_dialog_new("Save Text ",
-            GTK_WINDOW(toplevel),
-            GTK_FILE_CHOOSER_ACTION_SAVE,
-            "Cancel", GTK_RESPONSE_CANCEL,
-            "Save", GTK_RESPONSE_ACCEPT,
-            NULL);
+        GTK_WINDOW(toplevel),
+        GTK_FILE_CHOOSER_ACTION_SAVE,
+        "Cancel", GTK_RESPONSE_CANCEL,
+        "Save", GTK_RESPONSE_ACCEPT,
+        NULL);
     switch (gtk_dialog_run(GTK_DIALOG(dialog)))
     {
-        case GTK_RESPONSE_ACCEPT:
-            {
-                gchar* filename;
-                filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-
-                gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
-                break;
-            }
-        default:
-            break;
+    case GTK_RESPONSE_ACCEPT:
+    {
+        gchar* filename;
+        filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        
+        gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+        break;
+    }
+    default:
+        break;
     }
     gtk_widget_destroy(dialog);
-
+    
 }
 
 gboolean ctrl_z(GtkWidget* widget)
 {
-    /*
-       This event handler is for ctrl+w, ctrl+y, ctrl+z operatins on the window.
-       It is defined over here as it affects the sheet.
-       */
-    if(!is_empty_stack(undo))
-    {
-        redo = gdk_pixbuf_copy(surface_pixbuf);
-        surface_pixbuf = gdk_pixbuf_copy(pop_stack(&undo));
-        surface = gdk_cairo_surface_create_from_pixbuf (surface_pixbuf, 1, NULL);
-        context = cairo_create(surface);
-        cairo_set_source_surface(context, surface, 0, 0);
-    }
+/*
+	This event handler is for ctrl+w, ctrl+y, ctrl+z operatins on the window.
+	It is defined over here as it affects the sheet.
+*/
+	if(!is_empty_stack(undo))
+        {
+		redo = gdk_pixbuf_copy(surface_pixbuf);
+		surface_pixbuf = gdk_pixbuf_copy(pop_stack(&undo));
+                surface = gdk_cairo_surface_create_from_pixbuf (surface_pixbuf, 1, NULL);
+                context = cairo_create(surface);
+                cairo_set_source_surface(context, surface, 0, 0);
+                printf("ctrl z\n");
+	}
 
-    return TRUE;	    
+        return TRUE;	    
 }
 
 gboolean ctrl_y(GtkWidget* widget)
 {
-    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-    surface_pixbuf = gdk_pixbuf_copy(redo);
-    surface = gdk_cairo_surface_create_from_pixbuf (surface_pixbuf, 1, NULL);
-    return TRUE;
+	undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+        surface_pixbuf = gdk_pixbuf_copy(redo);
+        surface = gdk_cairo_surface_create_from_pixbuf (surface_pixbuf, 1, NULL);
+        printf("ctrl y\n");
+	return TRUE;
 }
 
 void openfile(GtkButton *button, gpointer user_data)
 {
-
     button = button;
     g_print("Loading...\n");
 
     GtkWidget* toplevel = gtk_widget_get_toplevel(GTK_WIDGET(button));
     GtkFileFilter *filter = gtk_file_filter_new ();
     GtkWidget* dialog = gtk_file_chooser_dialog_new(("Open image"),
-            GTK_WINDOW(toplevel),
-            GTK_FILE_CHOOSER_ACTION_OPEN,
-            "Open", GTK_RESPONSE_ACCEPT,
-            "Cancel", GTK_RESPONSE_CANCEL,
-            NULL);
+        GTK_WINDOW(toplevel),
+        GTK_FILE_CHOOSER_ACTION_OPEN,
+        "Open", GTK_RESPONSE_ACCEPT,
+        "Cancel", GTK_RESPONSE_CANCEL,
+        NULL);
 
     gtk_file_filter_add_pixbuf_formats (filter);
     gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog),filter);
 
     switch (gtk_dialog_run(GTK_DIALOG(dialog)))
     {
-        case GTK_RESPONSE_ACCEPT:
-            {
-                filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-                while(!is_empty_stack(undo))
-                {
-                    pop_stack(&undo);
-                }
-
-                undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-                glob.image = cairo_image_surface_create_from_png(filename);
-                surface = glob.image;
-
-                surface_pixbuf = gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
-                //gtk_window_set_default_size(GTK_WINDOW(window), cairo_image_surface_get_width (surface), cairo_image_surface_get_height (surface));
-
-                break;
-            }
-        default:
-            break;
+    case GTK_RESPONSE_ACCEPT:
+    {
+        filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        glob.image = cairo_image_surface_create_from_png(filename);
+        break;
+    }
+    default:
+        break;
     }
     gtk_widget_destroy(dialog);
 }
@@ -144,30 +127,24 @@ double blue = 0;
 gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
 {   
     //surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
-
+    
     if (filename == NULL)
     {
-        cairo_set_source_rgba(context, 0.5, 0.5, 0.1,1);
-        cairo_set_source_surface(context, surface, 0, 0);
-        //do_drawing(context);
-        cairo_paint(context);
-        if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-            surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-        else
-            surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
-        return TRUE;
+      cairo_set_source_rgba(context, 0.5, 0.5, 0.1,1);
+      cairo_set_source_surface(context, surface, 0, 0);
+      //do_drawing(context);
+      cairo_paint(context);
+      surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+      return TRUE;
     }
     else
     {
-        cairo_set_source_surface(context, glob.image, 0, 0);
-        cairo_paint(context);
-        if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-            surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-        else
-            surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
-        return TRUE;
+    cairo_set_source_surface(context, glob.image, 0, 0);
+    cairo_paint(context);
+    surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+    return TRUE;
     }
-
+    
 }
 size_t rectangled = 0;
 size_t cheat_bucket = 1;
@@ -175,10 +152,10 @@ size_t bucketed = 0;
 size_t erased = 0;
 void return_draw()
 {
-    rectangled = 0;
-    bucketed = 0;
-    erased = 0;
-    filename = NULL;
+  rectangled = 0;
+  bucketed = 0;
+  erased = 0;
+  filename = NULL;
 }
 
 void website_button()
@@ -190,30 +167,30 @@ void website_button()
 }
 
 /*static gboolean on_draw(GtkWidget *da, GdkEvent *event, cairo_t* cr, gpointer data)
-  {
-  (void)event; (void)data;
-  GdkPixbuf *pix;
-  GError *err = NULL;
-  pix = gdk_pixbuf_new_from_file("esfse", &err);
-  if(err)
-  {
-  printf("Error : %s\n", err->message);
-  g_error_free(err);
-  return FALSE;
-  }
-//    cr = gdk_cairo_create (da->window);
-gdk_cairo_set_source_pixbuf(cr, pix, 0, 0);
-cairo_paint(cr);
-//    cairo_fill (cr);
-cairo_destroy (cr);
-return FALSE;
+{
+    (void)event; (void)data;
+    GdkPixbuf *pix;
+    GError *err = NULL;
+    pix = gdk_pixbuf_new_from_file("esfse", &err);
+    if(err)
+    {
+        printf("Error : %s\n", err->message);
+        g_error_free(err);
+        return FALSE;
+    }
+    //    cr = gdk_cairo_create (da->window);
+    gdk_cairo_set_source_pixbuf(cr, pix, 0, 0);
+    cairo_paint(cr);
+    //    cairo_fill (cr);
+    cairo_destroy (cr);
+    return FALSE;
 }*/
 
 /*static void do_drawing(cairo_t *cr)
-  {
+{
   cairo_set_source_surface(cr, glob.image, 10, 10);
   cairo_paint(cr);    
-  }*/
+}*/
 
 
 double mouseX;
@@ -232,286 +209,269 @@ void on_color1_color_set(GtkColorButton *cb)
 
 void erase_white()
 {
-    rectangled = 0;
-    bucketed = 0;
-    erased = 1;
+  rectangled = 0;
+  bucketed = 0;
+  erased = 1;
 }
 
 void value_changed(GtkWidget *scale, gpointer user_data) {
-
-    size1 = gtk_range_get_value(GTK_RANGE(scale));
-
+    
+   size1 = gtk_range_get_value(GTK_RANGE(scale));
+   
 }
 
 void flood_fill()
 {
-    erased = 0;
-    rectangled = 0;
-    bucketed = 1;
+  erased = 0;
+  rectangled = 0;
+  bucketed = 1;
 }
 
 void get_rect()
 {
-    erased = 0;
-    bucketed = 0;
-    rectangled = 1;
+  erased = 0;
+  bucketed = 0;
+  rectangled = 1;
 }
 
 //rectangle temporaire pour test le bucket
 void draw_rectangle()
 {
-    cairo_t *cr = cairo_create(surface);
-    cairo_set_source_rgb(cr, red, green, blue);
-    cairo_set_line_width(cr, 5);
-    int left_X = 10;
-    int right_X = 50;
-    int top_Y = 10;
-    int bot_Y = 50;
-    cairo_move_to(cr, left_X, bot_Y);
-    cairo_line_to(cr, right_X, bot_Y);
-    cairo_stroke(cr);
+  cairo_t *cr = cairo_create(surface);
+  cairo_set_source_rgb(cr, red, green, blue);
+  cairo_set_line_width(cr, 5);
+  int left_X = 10;
+  int right_X = 50;
+  int top_Y = 10;
+  int bot_Y = 50;
+  cairo_move_to(cr, left_X, bot_Y);
+  cairo_line_to(cr, right_X, bot_Y);
+  cairo_stroke(cr);
 
-    cairo_move_to(cr, left_X, top_Y);
-    cairo_line_to(cr, right_X, top_Y);
-    cairo_stroke(cr);
+  cairo_move_to(cr, left_X, top_Y);
+  cairo_line_to(cr, right_X, top_Y);
+  cairo_stroke(cr);
 
-    cairo_move_to(cr, left_X, bot_Y+2);
-    cairo_line_to(cr, left_X, top_Y-2);
-    cairo_stroke(cr);
+  cairo_move_to(cr, left_X, bot_Y+2);
+  cairo_line_to(cr, left_X, top_Y-2);
+  cairo_stroke(cr);
 
-    cairo_move_to(cr, right_X, bot_Y+2);
-    cairo_line_to(cr, right_X, top_Y-2);
-    cairo_stroke(cr);
+  cairo_move_to(cr, right_X, bot_Y+2);
+  cairo_line_to(cr, right_X, top_Y-2);
+  cairo_stroke(cr);
 }
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
-
-
-    if (rectangled == 1)
+  if (rectangled == 1)
     {
-        draw_rectangle();
+      draw_rectangle();
     }
-    else if (bucketed == 1)
+  else if (bucketed == 1)
     {
-        if (cheat_bucket == 1)
-        {
-            if(GDK_BUTTON_PRESS)
+      if (cheat_bucket == 1)
+	{
+	  if(GDK_BUTTON_PRESS)
+	    {
+	      cairo_t *context = cairo_create(surface);
+	      cairo_set_line_width(context, 1);
+
+	      if(acc != 0)
+		{
+		  previousX = mouseX;
+		  previousY = mouseY;
+		  surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		}
+	      GdkEventMotion * e = (GdkEventMotion *) event;
+	      if (acc == 0)
+		{
+		  cairo_set_source_rgb(context, red, green, blue);
+		  previousX = e->x;
+		  previousY = e->y;
+		  double tmpX = previousX;
+		  double tmpY = previousY;
+		  while (previousX < gtk_widget_get_allocated_width(widget))
+		    {
+		      while (previousY < gtk_widget_get_allocated_height(widget))
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY += 1;
+			}
+		      previousY = tmpY-1;
+		      while (previousY > 0)
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY -= 1;
+			}
+		      previousX += 1;
+		      previousY = tmpY;
+		    }
+		  previousX = tmpX;
+		  while (previousX > 0)
+		    {
+		      while (previousY < gtk_widget_get_allocated_height(widget))
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY += 1;
+			}
+		      previousY -= 1;
+		      while (previousY > 0)
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY -= 1;
+			}
+		      previousX -= 1;
+		      previousY = tmpY;
+		    }
+		}
+	      mouseX= e->x;
+	      mouseY = e->y;
+
+	      //cairo_set_source_rgb(context, , 0.5, 0.5);
+	      cairo_stroke(context);
+
+	      cairo_destroy(context);
+
+	      gtk_widget_queue_draw_area(widget, 0, 0,
+					 gtk_widget_get_allocated_width(widget),
+					 gtk_widget_get_allocated_height(widget));
+	      cheat_bucket = 0;
+	      return TRUE;
+	    }
+	}
+      else if(GDK_BUTTON_PRESS)
+	{
+	  cairo_t *context = cairo_create(surface);
+	  cairo_set_line_width(context, 1);
+
+	  if(acc != 0)
             {
-                cairo_t *context = cairo_create(surface);
-                cairo_set_line_width(context, 1);
-
-                if(acc != 0 )
-                {
-                    previousX = mouseX;
-                    previousY = mouseY;
-                    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-                        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-                }
-                GdkEventMotion * e = (GdkEventMotion *) event;
-                if (acc == 0 ) 
-                {
-                    cairo_set_source_rgb(context, red, green, blue);
-                    previousX = e->x;
-                    previousY = e->y;
-                    double tmpX = previousX;
-                    double tmpY = previousY;
-                    while (previousX < gtk_widget_get_allocated_width(widget))
-                    {
-                        while (previousY < gtk_widget_get_allocated_height(widget))
-                        {
-                            cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                            previousY += 1;
-                        }
-                        previousY = tmpY-1;
-                        while (previousY > 0)
-                        {
-                            cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                            previousY -= 1;
-                        }
-                        previousX += 1;
-                        previousY = tmpY;
-                    }
-                    previousX = tmpX;
-                    while (previousX > 0)
-                    {
-                        while (previousY < gtk_widget_get_allocated_height(widget))
-                        {
-                            cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                            previousY += 1;
-                        }
-                        previousY -= 1;
-                        while (previousY > 0)
-                        {
-                            cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                            previousY -= 1;
-                        }
-                        previousX -= 1;
-                        previousY = tmpY;
-                    }
-                }
-                mouseX= e->x;
-                mouseY = e->y;
-
-                //cairo_set_source_rgb(context, , 0.5, 0.5);
-                cairo_stroke(context);
-
-                cairo_destroy(context);
-
-                gtk_widget_queue_draw_area(widget, 0, 0,
-                        gtk_widget_get_allocated_width(widget),
-                        gtk_widget_get_allocated_height(widget));
-                cheat_bucket = 0;
-                return TRUE;
+	      previousX = mouseX;
+	      previousY = mouseY;
+	      surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
             }
-        }
-        else if(GDK_BUTTON_PRESS)
-        {
-            cairo_t *context = cairo_create(surface);
-            cairo_set_line_width(context, 1);
-
-            if(acc != 0)
+	  GdkEventMotion * e = (GdkEventMotion *) event;
+	  if (acc == 0)
             {
-                previousX = mouseX;
-                previousY = mouseY;
-                if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-                    surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-                //surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+	      cairo_set_source_rgb(context, red, green, blue);
+	      previousX = e->x;
+	      previousY = e->y;
+	      double tmpX = previousX;
+	      double tmpY = previousY;
+	      guchar *origine = gdk_pixbuf_get_pixels(surface_pixbuf);
+	      guchar *pixel;
+	      while (previousX < gtk_widget_get_allocated_width(widget))
+		{
+		  surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		  pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
+		  if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
+		    {
+		      cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+		    }
+		  else
+		    {			cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+		      break;
+		    }
+		  while (previousY < gtk_widget_get_allocated_height(widget))
+		    {
+		      surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		      pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
+		      if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY += 1;
+			}
+		      else
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  break;
+			}
+		    }
+		  previousY = tmpY-1;
+		  while (previousY > 0)
+		    {
+		      surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		      pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
+		      if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY -= 1;
+			}
+		      else
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  break;
+			}
+		    }
+		  previousX += 1;
+		  previousY = tmpY;
+		}
+	      previousX = tmpX;
+	      previousY = tmpY;
+	      while (previousX > 0)
+		{
+		  surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		  pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
+		  if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
+		    {
+		      cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+		    }
+		  else
+		    {
+		      cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+		      break;
+		    }
+		  while (previousY < gtk_widget_get_allocated_height(widget))
+		    {
+		      surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		      pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
+		      if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY += 1;
+			}
+		      else
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  break;
+			}
+		    }
+		  previousY -= 1;
+		  while (previousY > 0)
+		    {
+		      surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+		      pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
+		      if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  previousY -= 1;
+			}
+		      else
+			{
+			  cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+			  break;
+			}
+		    }
+		  previousX -= 1;
+		  previousY = tmpY;
+		}
             }
-            GdkEventMotion * e = (GdkEventMotion *) event;
-            if (acc == 0)
-            {
-                cairo_set_source_rgb(context, red, green, blue);
-                previousX = e->x;
-                previousY = e->y;
-                double tmpX = previousX;
-                double tmpY = previousY;
-                guchar *origine = gdk_pixbuf_get_pixels(surface_pixbuf);
-                guchar *pixel;
-                while (previousX < gtk_widget_get_allocated_width(widget))
-                {
-                    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-                        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-                    //surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
-                    pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
-                    if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
-                    {
-                        cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                    }
-                    else
-                    {			cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                        break;
-                    }
-                    while (previousY < gtk_widget_get_allocated_height(widget))
-                    {
-                        if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-                            surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-                        //surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
-                        pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
-                        if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
-                        {
-                            cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                            previousY += 1;
-                        }
-                        else
-                        {
-                            cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                            break;
-                        }
-                    }
-                    previousY = tmpY-1;
-                    while (previousY > 0)
-                    {
-                        if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-                            surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-                        //surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
-                        pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
-                        if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
-                        {
-                            cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                            previousY -= 1;
-                        }
-                        else
-                        {
-                            cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                            break;
-                        }
-                    }
-                    previousX += 1;
-                    previousY = tmpY;
-                }
-                previousX = tmpX;
-                previousY = tmpY;
-                while (previousX > 0)
-                {
-                    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-                        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-                    //surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
-                    pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
-                    if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
-                    {
-                        cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                    }
-                    else
-                    {
-                        cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                        break;
-                    }
-                    while (previousY < gtk_widget_get_allocated_height(widget))
-                    {
-                        if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-                            surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-                        //surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
-                        pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
-                        if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
-                        {
-                            cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                            previousY += 1;
-                        }
-                        else
-                        {
-                            cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                            break;
-                        }
-                    }
-                    previousY -= 1;
-                    while (previousY > 0)
-                    {
-                        if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-                            surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-                        //surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,previousX,previousY,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
-                        pixel = gdk_pixbuf_get_pixels(surface_pixbuf);
-                        if (pixel[0] == origine[0] && pixel[1] == origine[1] && pixel[2] == origine[2])
-                        {
-                            cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                            previousY -= 1;
-                        }
-                        else
-                        {
-                            cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
-                            break;
-                        }
-                    }
-                    previousX -= 1;
-                    previousY = tmpY;
-                }
-            }
-            mouseX= e->x;
-            mouseY = e->y;
+	  mouseX= e->x;
+	  mouseY = e->y;
 
-            //cairo_set_source_rgb(context, , 0.5, 0.5);
-            cairo_stroke(context);
+	  //cairo_set_source_rgb(context, , 0.5, 0.5);
+	  cairo_stroke(context);
 
-            cairo_destroy(context);
+	  cairo_destroy(context);
 
-            gtk_widget_queue_draw_area(widget, 0, 0,
-                    gtk_widget_get_allocated_width(widget),
-                    gtk_widget_get_allocated_height(widget));
-
-            return TRUE;
-        }
+	  gtk_widget_queue_draw_area(widget, 0, 0,
+				     gtk_widget_get_allocated_width(widget),
+				     gtk_widget_get_allocated_height(widget));
+            
+	  return TRUE;
+	}
     }
-    else if (erased == 0) 
+  else if (erased == 0) 
     {
         cairo_t *context = cairo_create(surface);
 
@@ -519,8 +479,8 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
         {
             if (start_click == 1)
             {
-                undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-                start_click = 0;
+              undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+              start_click = 0;
             }
             //printf("test\n");
             cairo_set_line_width(context, size1);
@@ -530,11 +490,9 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
             {
                 previousX = mouseX;
                 previousY = mouseY;
-                if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-                    surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-                //surface_pixbuf = gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+                surface_pixbuf = gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
                 //gdk_pixbuf_save (surface_pixbuf, "snapshot.png", "png", NULL, NULL);
-
+                
             }
             GdkEventMotion * e = (GdkEventMotion *) event;
             if (acc == 0)
@@ -546,7 +504,7 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
                 //cairo_arc(context, previousX, previousY, size1, 0, 2*M_PI);
                 cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
                 //cairo_fill_preserve(context);
-
+                
             }
 
 
@@ -566,8 +524,8 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
             gtk_widget_queue_draw_area(widget, 0, 0,
                     gtk_widget_get_allocated_width(widget),
                     gtk_widget_get_allocated_height(widget));
-
-
+            
+           
             return TRUE;
         }
     }
@@ -575,10 +533,10 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
     {
         if(GDK_BUTTON_PRESS)
         {
-            if (start_click == 1)
+             if (start_click == 1)
             {
-                undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-                start_click = 0;
+              undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+              start_click = 0;
             }
 
             //printf("test\n");
@@ -590,9 +548,7 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
             {
                 previousX = mouseX;
                 previousY = mouseY;
-                if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-                    surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-                //surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+                surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
             }
             GdkEventMotion * e = (GdkEventMotion *) event;
             if (acc == 0)
@@ -622,8 +578,8 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
             gtk_widget_queue_draw_area(widget, 0, 0,
                     gtk_widget_get_allocated_width(widget),
                     gtk_widget_get_allocated_height(widget));
-
-
+            
+            
             return TRUE;
         }
     }
@@ -632,192 +588,11 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 
 gboolean on_click_release(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
+    printf("in stack\n");
     acc = 0;
     start_click = 1;
     return TRUE;
 }
-
-
-
-gboolean refresh(GtkWidget *widget, GdkEventExpose*event, gpointer user_data)
-{
-    gtk_widget_queue_draw_area(widget, 0, 0,
-            gtk_widget_get_allocated_width(widget),
-            gtk_widget_get_allocated_height(widget));
-    return TRUE;
-}
-
-
-gboolean loadblank(GtkWidget* widget)
-{
-    while(!is_empty_stack(undo))
-    {
-        pop_stack(&undo);
-    }
-
-    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-    glob.image = cairo_image_surface_create_from_png("blank");
-    surface = glob.image;
-    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
-
-    return TRUE;
-}
-
-gboolean grey(GtkWidget *widget)
-{
-    char* filename = ".temp_filter";
-    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
-    init_sdl();
-    SDL_Surface *image = load_image(filename);
-
-    __grayscale(image);
-
-    SDL_Surface *bmp = image;
-    SDL_SavePNG(bmp, filename);
-    SDL_FreeSurface(image);
-
-    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-    glob.image = cairo_image_surface_create_from_png(filename);
-    surface = glob.image;
-    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
-    return TRUE;
-}
-
-gboolean invert(GtkWidget *widget)
-{
-    char* filename = ".temp_filter";
-    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
-    init_sdl();
-    SDL_Surface *image = load_image(filename);
-
-    __negative(image);
-
-    SDL_Surface *bmp = image;
-    SDL_SavePNG(bmp, filename);
-    SDL_FreeSurface(image);
-
-    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-    glob.image = cairo_image_surface_create_from_png(filename);
-    surface = glob.image;
-    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
-    return TRUE;
-}
-
-gboolean cyann(GtkWidget *widget)
-{
-    char* filename = ".temp_filter";
-    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
-    init_sdl();
-    SDL_Surface *image = load_image(filename);
-
-    __cyan(image);
-
-    SDL_Surface *bmp = image;
-    SDL_SavePNG(bmp, filename);
-    SDL_FreeSurface(image);
-
-    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-    glob.image = cairo_image_surface_create_from_png(filename);
-    surface = glob.image;
-    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
-    return TRUE;
-}
-
-gboolean rosee(GtkWidget *widget)
-{
-    char* filename = ".temp_filter";
-    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
-    init_sdl();
-    SDL_Surface *image = load_image(filename);
-
-    __rose(image);
-
-    SDL_Surface *bmp = image;
-    SDL_SavePNG(bmp, filename);
-    SDL_FreeSurface(image);
-
-    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-    glob.image = cairo_image_surface_create_from_png(filename);
-    surface = glob.image;
-    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
-    return TRUE;
-}
-gboolean yelloww(GtkWidget *widget)
-{
-    char* filename = ".temp_filter";
-    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
-    init_sdl();
-    SDL_Surface *image = load_image(filename);
-
-    __yellow(image);
-
-    SDL_Surface *bmp = image;
-    SDL_SavePNG(bmp, filename);
-    SDL_FreeSurface(image);
-
-    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-    glob.image = cairo_image_surface_create_from_png(filename);
-    surface = glob.image;
-    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
-    return TRUE;
-}
-
-gboolean BAW(GtkWidget *widget)
-{
-    char* filename = ".temp_filter";
-    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
-    init_sdl();
-    SDL_Surface *image = load_image(filename);
-
-    __blackandwhite(image);
-
-    SDL_Surface *bmp = image;
-    SDL_SavePNG(bmp, filename);
-    SDL_FreeSurface(image);
-
-    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-    glob.image = cairo_image_surface_create_from_png(filename);
-    surface = glob.image;
-    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
-    return TRUE;
-}
-
-gboolean mirrorr(GtkWidget *widget)
-{
-    char* filename = ".temp_filter";
-    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
-    init_sdl();
-    SDL_Surface *image = load_image(filename);
-
-    __mirror(image);
-
-    SDL_Surface *bmp = image;
-    SDL_SavePNG(bmp, filename);
-    SDL_FreeSurface(image);
-
-    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-    glob.image = cairo_image_surface_create_from_png(filename);
-    surface = glob.image;
-    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
-    return TRUE;
-}
-
 
 
 void create_window(GtkApplication *app, gpointer data)
@@ -826,81 +601,52 @@ void create_window(GtkApplication *app, gpointer data)
     GtkWidget *window;
     GtkWidget *drawarea;
     GtkWidget *color1;
-    GtkWidget *load;
+    GtkButton *load;
     GtkButton *pen;
     GtkButton *erase;
     GtkWidget *web;
-    GtkWidget *save;
+    GtkButton *save;
     GtkWidget *hscale;
     GtkPaned *grid;
     GtkButton *retour;
     GtkButton *annul;
     GtkButton *bucket;
     GtkButton *rect;
-    GtkWidget *new;
-    GtkWidget *menu;
-    //FILTERS
-    GtkWidget *filter1;
-    GtkWidget *filter2;
-    GtkWidget *filter3;
-    GtkWidget *filter4;
-    GtkWidget *filter5;
-    GtkWidget *filter6;
-    GtkWidget *filter7;
 
     GtkAdjustment* adjustement = gtk_adjustment_new(1.0,0.0,10.0,1.0,1.0, 0.0);
 
     GtkBuilder *builder = gtk_builder_new_from_file("pinte.glade");
     CHECK(builder)
-        window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
+    window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
     CHECK(window)
-
-        drawarea = GTK_WIDGET(gtk_builder_get_object(builder, "drawarea"));
+    drawarea = GTK_WIDGET(gtk_builder_get_object(builder, "drawarea"));
     CHECK(drawarea)
-        color1 = GTK_WIDGET(gtk_builder_get_object(builder, "color1"));
+    color1 = GTK_WIDGET(gtk_builder_get_object(builder, "color1"));
     CHECK(color1)
-        pen = GTK_BUTTON(gtk_builder_get_object(builder, "pen"));
+    pen = GTK_BUTTON(gtk_builder_get_object(builder, "pen"));
     CHECK(pen)
-        load = GTK_WIDGET(gtk_builder_get_object(builder, "load"));
+    load = GTK_BUTTON(gtk_builder_get_object(builder, "load"));
     CHECK(load)
-        erase = GTK_BUTTON(gtk_builder_get_object(builder, "erase"));
+    erase = GTK_BUTTON(gtk_builder_get_object(builder, "erase"));
     CHECK(erase)
-        web = GTK_WIDGET(gtk_builder_get_object(builder, "web"));
+    web = GTK_WIDGET(gtk_builder_get_object(builder, "web"));
     CHECK(web)
-        menu = GTK_WIDGET(gtk_builder_get_object(builder, "menu"));
-    CHECK(menu)
-
-        grid = GTK_PANED(gtk_builder_get_object(builder, "grid"));
-    save = GTK_WIDGET(gtk_builder_get_object(builder, "save"));
+    grid = GTK_PANED(gtk_builder_get_object(builder, "grid"));
+    //hscale = GTK_WIDGET(gtk_builder_get_object(builder, "erase"));
+    //CHECK(hscale)
+    save = GTK_BUTTON(gtk_builder_get_object(builder, "save"));
     CHECK(save)
-        retour = GTK_BUTTON(gtk_builder_get_object(builder, "return"));
+    retour = GTK_BUTTON(gtk_builder_get_object(builder, "return"));
     CHECK(retour)
-        annul = GTK_BUTTON(gtk_builder_get_object(builder, "cancel"));
+    annul = GTK_BUTTON(gtk_builder_get_object(builder, "cancel"));
     CHECK(annul)
-        bucket = GTK_BUTTON(gtk_builder_get_object(builder, "bucket"));
+    bucket = GTK_BUTTON(gtk_builder_get_object(builder, "bucket"));
     CHECK(bucket)
-        rect =  GTK_BUTTON(gtk_builder_get_object(builder, "rectangle"));
+    rect =  GTK_BUTTON(gtk_builder_get_object(builder, "rectangle"));
     CHECK(rect)
-        new = GTK_WIDGET(gtk_builder_get_object(builder, "new"));
-    CHECK(new)
-        //FILTERS
-        filter1 = GTK_WIDGET(gtk_builder_get_object(builder, "filter1"));
-    CHECK(filter1)
-        filter2 = GTK_WIDGET(gtk_builder_get_object(builder, "filter2"));
-    CHECK(filter2)
-        filter3 = GTK_WIDGET(gtk_builder_get_object(builder, "filter3"));
-    CHECK(filter3)
-        filter4 = GTK_WIDGET(gtk_builder_get_object(builder, "filter4"));
-    CHECK(filter4)
-        filter5 = GTK_WIDGET(gtk_builder_get_object(builder, "filter5"));
-    CHECK(filter5)
-        filter6 = GTK_WIDGET(gtk_builder_get_object(builder, "filter6"));
-    CHECK(filter6)
-        filter7 = GTK_WIDGET(gtk_builder_get_object(builder, "filter7"));
-    CHECK(filter7)
+		
 
-
-        hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
+    hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
     gtk_container_add(GTK_CONTAINER(grid), hscale);
 
     //g_signal_connect(G_OBJECT(drawarea), "draw",G_CALLBACK(on_draw_event), NULL); 
@@ -910,11 +656,7 @@ void create_window(GtkApplication *app, gpointer data)
             GDK_BUTTON_MOTION_MASK |
             GDK_BUTTON_RELEASE_MASK |
             GDK_KEY_PRESS_MASK);
-    gtk_widget_add_events(gtk_widget_get_toplevel (drawarea), 
-            GDK_BUTTON_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
-            GDK_BUTTON_MOTION_MASK |
-            GDK_BUTTON_RELEASE_MASK );
-    g_signal_connect(load, "activate", G_CALLBACK(openfile), NULL);
+    g_signal_connect(load, "clicked", G_CALLBACK(openfile), NULL);
     g_signal_connect(pen, "clicked", G_CALLBACK(return_draw), NULL);
     g_signal_connect(erase, "clicked", G_CALLBACK(erase_white), NULL);
     g_signal_connect(bucket, "clicked", G_CALLBACK(flood_fill), NULL);
@@ -925,22 +667,11 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(color1, "color-set", G_CALLBACK(on_color1_color_set), NULL);
     g_signal_connect(G_OBJECT(drawarea), "draw", G_CALLBACK(on_draw), NULL);
     g_signal_connect(web, "activate", G_CALLBACK(website_button), NULL);
-    g_signal_connect(save, "activate", G_CALLBACK(on_save),NULL);
+    g_signal_connect(save, "clicked", G_CALLBACK(on_save),NULL);
     g_signal_connect(hscale, "value-changed", G_CALLBACK(value_changed), NULL);
     g_signal_connect(retour, "clicked", G_CALLBACK(ctrl_z), NULL);
     g_signal_connect(annul, "clicked", G_CALLBACK(ctrl_y), NULL);
-    g_signal_connect(gtk_widget_get_toplevel (drawarea), "button-release-event", G_CALLBACK(refresh), NULL);
-    g_signal_connect(gtk_widget_get_toplevel(menu), "button-release-event", G_CALLBACK(refresh), NULL);
- 
-    g_signal_connect(new, "activate", G_CALLBACK(loadblank), NULL);
-    //FILTERS
-    g_signal_connect(filter1, "activate", G_CALLBACK(grey), NULL);
-    g_signal_connect(filter2, "activate", G_CALLBACK(invert), NULL);
-    g_signal_connect(filter3, "activate", G_CALLBACK(cyann), NULL);
-    g_signal_connect(filter4, "activate", G_CALLBACK(rosee), NULL);
-    g_signal_connect(filter5, "activate", G_CALLBACK(yelloww), NULL);
-    g_signal_connect(filter6, "activate", G_CALLBACK(BAW), NULL);
-    g_signal_connect(filter7, "activate", G_CALLBACK(mirrorr), NULL);
+
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_widget_show_all(window);
@@ -959,7 +690,7 @@ void create_window(GtkApplication *app, gpointer data)
     surface_pixbuf = gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(drawarea),gtk_widget_get_allocated_height(drawarea));
     undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
     cairo_destroy(context);
-
+    
     gtk_main();
 }
 
