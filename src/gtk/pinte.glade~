@@ -117,24 +117,6 @@
                   <object class="GtkMenu">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <child>
-                      <object class="GtkImageMenuItem" id="return2">
-                        <property name="label">gtk-undo</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="use-underline">True</property>
-                        <property name="use-stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="cancel2">
-                        <property name="label">gtk-redo</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="use-underline">True</property>
-                        <property name="use-stock">True</property>
-                      </object>
-                    </child>
                   </object>
                 </child>
               </object>
@@ -378,7 +360,7 @@
                     <property name="can-focus">True</property>
                     <child>
                       <object class="GtkButton" id="return">
-                        <property name="label" translatable="yes">Return</property>
+                        <property name="label" translatable="yes">Undo</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
@@ -390,7 +372,7 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="cancel">
-                        <property name="label" translatable="yes">Cancel</property>
+                        <property name="label" translatable="yes">Redo</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
@@ -439,8 +421,8 @@
             </child>
             <child>
               <object class="GtkDrawingArea" id="drawarea">
-                <property name="width-request">800</property>
-                <property name="height-request">500</property>
+                <property name="width-request">1400</property>
+                <property name="height-request">700</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
               </object>
