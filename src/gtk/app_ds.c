@@ -58,3 +58,44 @@ GdkPixbuf *pop_stack(struct Stack **base){
     }
     return buffer;
 }
+
+
+// Paint Queue
+gboolean is_queue_empty(){
+/*
+	Checks whether the queue is empty.
+*/
+	return (front == NULL);
+}
+
+struct Queue *push_queue(gint x, gint y, struct Queue *front){
+/*
+	Normal Push operation.
+*/
+	struct Queue *current, *new_point;
+	new_point = (struct Queue *)malloc(sizeof(struct Queue *));
+	new_point->point = (struct Point *)malloc(sizeof(struct Point *));
+	new_point->point->x = x;
+	new_point->point->y = y;
+	new_point->next = NULL;
+	if(is_queue_empty())
+		return new_point;
+	for(current = front ; current->next != NULL ; current = current->next);
+	current->next = new_point;
+	return front;
+}
+
+struct Point *pop_queue(){
+/*
+	Normal Pop operation.
+*/
+	struct Point *buffer;
+	buffer = front->point;
+	if(front->next == NULL){
+		front = NULL;
+	}
+	else{
+		front = front->next;
+	}
+	return buffer;
+}
