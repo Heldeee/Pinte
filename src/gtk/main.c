@@ -151,18 +151,17 @@ gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
         cairo_set_source_surface(context, surface, 0, 0);
         //do_drawing(context);
         cairo_paint(context);
-        if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-            surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-        else
-            surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
+     
         return TRUE;
     }
     else
     {
         cairo_set_source_surface(context, glob.image, 0, 0);
         cairo_paint(context);
-        if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
-            surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+        printf("%i\n",cairo_image_surface_get_width (glob.image));
+        printf("%i\n",cairo_image_surface_get_height(glob.image));
+        if (cairo_image_surface_get_width (glob.image)!= 0 && cairo_image_surface_get_height(glob.image)!=0)
+            surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (glob.image),cairo_image_surface_get_height(glob.image));
         else
             surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,gtk_widget_get_allocated_width(widget),gtk_widget_get_allocated_height(widget));
         return TRUE;
