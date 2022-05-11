@@ -563,7 +563,13 @@ void draw_rectangle(int size, GdkEventButton *event)
 
 void draw_circle(int size, GdkEventButton *event)
 {
-    //TODO Phu ton grand pere qui mange des nems
+    GdkEventMotion * e = (GdkEventMotion *) event;
+    cairo_t *cr = cairo_create(surface);
+    cairo_set_source_rgb(cr, red, green, blue);
+    cairo_set_line_width(cr, size1);  
+    cairo_translate(cr, size1/2, size1/2);
+    cairo_arc(cr, e->x, e->y, size2*40, 0, 2 * M_PI);
+    cairo_stroke_preserve(cr);
 }
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
@@ -1072,7 +1078,7 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(window, "motion-notify-event", G_CALLBACK(refresh), NULL);
     //g_signal_connect(drawarea, "button-release-event", G_CALLBACK(refresh), NULL);
     g_signal_connect(gtk_widget_get_toplevel(menu), "button-release-event", G_CALLBACK(refresh), NULL);
- 
+    
     g_signal_connect(new, "activate", G_CALLBACK(loadblank), NULL);
     //FILTERS
     g_signal_connect(filter1, "activate", G_CALLBACK(grey), NULL);
