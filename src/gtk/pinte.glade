@@ -340,7 +340,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="bucket">
+                      <object class="GtkButton" id="triangle">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -378,11 +378,18 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="triangle">
-                        <property name="label" translatable="yes">Triangle</property>
+                      <object class="GtkButton" id="bucket">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="stock">gtk-missing-image</property>
+                            <property name="icon_size">6</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -391,10 +398,17 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="losange">
-                        <property name="label" translatable="yes">Losange</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="stock">gtk-missing-image</property>
+                            <property name="icon_size">6</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>

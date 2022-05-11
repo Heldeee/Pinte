@@ -159,10 +159,9 @@ void draw_pixel(gint x, gint y, struct Color *color, gint p_size, cairo_t *conte
   /*
     Changes a Pixels color data int the Pixel buffer.
   */
-  g_print("enter draw_pixel\n");
   if(x >= 0 && x < drawareaX && y >= 0 && y < drawareaY){
     if(p_size == 0){
-      cairo_rectangle(context, x, y, 1, 1);
+      cairo_rectangle(context, x, y, 1.5, 1.5);
       cairo_fill(context);
       
       current = pixels + y * rowstride + x * n_channels;
@@ -175,7 +174,6 @@ void draw_pixel(gint x, gint y, struct Color *color, gint p_size, cairo_t *conte
       floodFill(x, y, color, p_size);
     }
   }
-  g_print("exit draw_pixel\n");
 }
 
 struct Color *getPixel(gint x, gint y){
@@ -215,7 +213,6 @@ gboolean check_pixel(gint x, gint y, struct Color *fgcolor, struct Color *bgcolo
 }
 
 void floodFill(gint x, gint y, struct Color *color, gint p_size){
-  g_print("begin floodFill\n");
   struct Point *current_point;
   gint west, east, valid_north, valid_south;
   struct Color *base_color = getPixel(x,y);
@@ -224,7 +221,6 @@ void floodFill(gint x, gint y, struct Color *color, gint p_size){
       return;
     }
   }
-  g_print("next\n");
   front = push_queue(x,y, NULL);
 
   cairo_t *context = cairo_create(surface);
@@ -236,8 +232,9 @@ void floodFill(gint x, gint y, struct Color *color, gint p_size){
       valid_south = 0;
       current_point = pop_queue();
       for(west = current_point->x; check_pixel(west, current_point->y, color, base_color, p_size, x, y); west--);
-      
+      west--;
       for(east = current_point->x; check_pixel(east, current_point->y, color, base_color, p_size, x, y); east++);
+      east++;
       
       for(west = west + 1 ; west < east ; west++)
 	{
@@ -270,7 +267,6 @@ void floodFill(gint x, gint y, struct Color *color, gint p_size){
   cairo_destroy(context);
   free(current_point);
   free(front);
-  g_print("end floodFill\n");
 }
 
 
@@ -1031,7 +1027,12 @@ void create_window(GtkApplication *app, gpointer data)
     GtkWidget *imageCircle = gtk_image_new_from_file("icons/circle.png");
     gtk_button_set_image(circle, imageCircle);
     
-      
+    GtkWidget *imageTriangle = gtk_image_new_from_file("icons/triangle.png");
+    gtk_button_set_image(triangle, imageTriangle);
+
+    GtkWidget *imageLosange = gtk_image_new_from_file("icons/losange.png");
+    gtk_button_set_image(losange, imageLosange);
+    
     hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
     gtk_container_add(GTK_CONTAINER(grid), hscale);
 
