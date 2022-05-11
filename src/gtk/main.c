@@ -18,7 +18,8 @@ struct {
 gchar filename1;
 const char* filename;
 GtkRange *range;
-gdouble size1 =1;   
+gdouble size1 =1;
+gdouble size2 = 1;
 GdkPixbuf *surface_pixbuf;
 GdkPixbuf *redo;
 struct Stack *undo;
@@ -58,7 +59,7 @@ void on_save(GtkButton *button, gpointer user_data)
             }
         default:
             break;
-    }
+     }
     gtk_widget_destroy(dialog);
 
 }
@@ -169,12 +170,16 @@ gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
 
 }
 size_t rectangled = 0;
+size_t triangled = 0;
+size_t losanged = 0;
+size_t circled = 0;
 size_t cheat_bucket = 1;
 size_t bucketed = 0;
 size_t erased = 0;
 void return_draw()
 {
     rectangled = 0;
+    triangled = 0;
     bucketed = 0;
     erased = 0;
     filename = NULL;
@@ -234,6 +239,9 @@ void erase_white()
     rectangled = 0;
     bucketed = 0;
     erased = 1;
+    triangled = 0;
+    losanged = 0;
+    circled = 0;
 }
 
 void value_changed(GtkWidget *scale, gpointer user_data) {
@@ -242,11 +250,19 @@ void value_changed(GtkWidget *scale, gpointer user_data) {
 
 }
 
+void value_changed2(GtkWidget *scale, gpointer user_data)
+{
+    size2 = gtk_range_get_value(GTK_RANGE(scale));
+}
+
 void flood_fill()
 {
     erased = 0;
     rectangled = 0;
     bucketed = 1;
+    triangled = 0;
+    losanged = 0;
+    circled = 0;
 }
 
 void get_rect()
@@ -254,33 +270,138 @@ void get_rect()
     erased = 0;
     bucketed = 0;
     rectangled = 1;
+    triangled = 0;
+    losanged = 0;
+    circled = 0;
+}
+
+void get_triangle()
+{
+    erased = 0;
+    bucketed = 0;
+    triangled = 1;
+    rectangled = 0;
+    losanged = 0;
+    circled = 0;
+}
+
+void get_losange()
+{
+    erased = 0;
+    bucketed = 0;
+    triangled = 0;
+    rectangled = 0;
+    losanged = 1;
+    circled = 0;
+}
+
+void get_circle()
+{   erased = 0;
+    bucketed = 0;
+    triangled = 0;
+    rectangled = 0;
+    losanged = 0;
+    circled = 1;
 }
 
 //rectangle temporaire pour test le bucket
-void draw_rectangle()
+void draw_triangle(int size, GdkEventButton *event)
 {
+    GdkEventMotion * e = (GdkEventMotion *) event;
+    int mousex= e->x;
+    int mousey = e->y;
     cairo_t *cr = cairo_create(surface);
     cairo_set_source_rgb(cr, red, green, blue);
     cairo_set_line_width(cr, 5);
-    int left_X = 10;
-    int right_X = 50;
-    int top_Y = 10;
-    int bot_Y = 50;
-    cairo_move_to(cr, left_X, bot_Y);
-    cairo_line_to(cr, right_X, bot_Y);
+    int a_x = mousex;
+    int a_y = mousey;
+    int b_x = mousex + size;
+    int b_y = mousey;
+    int c_x = mousex + size/2;
+    int c_y = mousey - sqrt((size * size) - (size*size)/4);
+
+
+    cairo_move_to(cr, a_x, a_y);
+    cairo_line_to(cr, b_x, b_y);
     cairo_stroke(cr);
 
-    cairo_move_to(cr, left_X, top_Y);
-    cairo_line_to(cr, right_X, top_Y);
+    cairo_move_to(cr, a_x, a_y);
+    cairo_line_to(cr, c_x, c_y);
     cairo_stroke(cr);
 
-    cairo_move_to(cr, left_X, bot_Y+2);
-    cairo_line_to(cr, left_X, top_Y-2);
+    cairo_move_to(cr, b_x, b_y);
+    cairo_line_to(cr, c_x, c_y);
+    cairo_stroke(cr);
+}
+
+void draw_losange(int size, GdkEventButton *event)
+{
+    GdkEventMotion * e = (GdkEventMotion *) event;
+    int mousex= e->x;
+    int mousey = e->y;
+    cairo_t *cr = cairo_create(surface);
+    cairo_set_source_rgb(cr, red, green, blue);
+    cairo_set_line_width(cr, 5);
+    int a_x = mousex;
+    int a_y = mousey;
+    int b_x = mousex + size;
+    int b_y = mousey;
+    int c_x = mousex + size/2;
+    int c_y = mousey - size/4;
+    int d_x = mousex + size/2;
+    int d_y = mousey + size/4;
+
+
+    cairo_move_to(cr, a_x, a_y);
+    cairo_line_to(cr, c_x, c_y);
     cairo_stroke(cr);
 
-    cairo_move_to(cr, right_X, bot_Y+2);
-    cairo_line_to(cr, right_X, top_Y-2);
+    cairo_move_to(cr, a_x, a_y);
+    cairo_line_to(cr, d_x, d_y);
     cairo_stroke(cr);
+
+    cairo_move_to(cr, c_x, c_y);
+    cairo_line_to(cr, b_x, b_y);
+    cairo_stroke(cr);
+
+    cairo_move_to(cr, d_x, d_y);
+    cairo_line_to(cr, b_x, b_y);
+    cairo_stroke(cr);
+}
+
+
+void draw_rectangle(int size, GdkEventButton *event)
+{
+    GdkEventMotion * e = (GdkEventMotion *) event;
+    int mousex= e->x;
+    int mousey = e->y;
+    cairo_t *cr = cairo_create(surface);
+    cairo_set_source_rgb(cr, red, green, blue);
+    cairo_set_line_width(cr, 5);
+    int left_x = mousex;
+    int right_x = mousex + size;
+    int top_y = mousey;
+    int bot_y = mousey + size;
+    cairo_move_to(cr, left_x, bot_y);
+    cairo_line_to(cr, right_x, bot_y);
+    cairo_stroke(cr);
+
+    cairo_move_to(cr, left_x, top_y);
+    cairo_line_to(cr, right_x, top_y);
+    cairo_stroke(cr);
+
+    cairo_move_to(cr, left_x, bot_y+2);
+    cairo_line_to(cr, left_x, top_y-2);
+    cairo_stroke(cr);
+
+    cairo_move_to(cr, right_x, bot_y+2);
+    cairo_line_to(cr, right_x, top_y-2);
+    cairo_stroke(cr);
+}
+
+void draw_circle(int size, GdkEventButton *event)
+{
+    //TODO Phu ton grand pere qui mange des nems
 }
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
@@ -289,9 +410,25 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 
     if (rectangled == 1)
     {
-        draw_rectangle();
+        undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+        draw_rectangle(100 * size2, event);
     }
-     else if (bucketed == 1)
+    else if (triangled == 1)
+    {
+        undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+        draw_triangle(100 * size2, event);
+    }
+    else if (losanged == 1)
+    {
+        undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+        draw_losange(100 * size2, event);
+    }
+    else if (circled == 1)
+    {
+        undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+        draw_circle(100 * size2, event);
+    }
+    else if (bucketed == 1)
     {
       if (cheat_bucket == 1)
 	{
@@ -816,11 +953,16 @@ void create_window(GtkApplication *app, gpointer data)
     GtkWidget *web;
     GtkWidget *save;
     GtkWidget *hscale;
+    GtkWidget *hscale2;
     GtkPaned *grid;
+    GtkPaned *grid2;
     GtkButton *retour;
     GtkButton *annul;
     GtkButton *bucket;
     GtkButton *rect;
+    GtkButton *triangle;
+    GtkButton *losange;
+    GtkButton *circle;
     GtkWidget *new;
     GtkWidget *menu;
     //FILTERS
@@ -832,13 +974,15 @@ void create_window(GtkApplication *app, gpointer data)
     GtkWidget *filter6;
     GtkWidget *filter7;
 
-    GtkAdjustment* adjustement = gtk_adjustment_new(1.0,0.0,10.0,1.0,1.0, 0.0);
+    GtkAdjustment* adjustement = gtk_adjustment_new(1.0,1.0,10.0,1.0,1.0, 0.0);
+    GtkAdjustment* adjustement2 = gtk_adjustment_new(1.0,1.0,10.0,1.0,1.0, 0.0);
 
     GtkBuilder *builder = gtk_builder_new_from_file("pinte.glade");
     CHECK(builder)
         window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
     CHECK(window)
-
+    triangle = GTK_BUTTON(gtk_builder_get_object(builder, "triangle"));
+    CHECK(triangle)
         drawarea = GTK_WIDGET(gtk_builder_get_object(builder, "drawarea"));
     CHECK(drawarea)
         color1 = GTK_WIDGET(gtk_builder_get_object(builder, "color1"));
@@ -855,6 +999,10 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(menu)
 
         grid = GTK_PANED(gtk_builder_get_object(builder, "grid"));
+    CHECK(grid)
+        grid2 = GTK_PANED(gtk_builder_get_object(builder, "grid2"));
+    CHECK(grid2)
+
     save = GTK_WIDGET(gtk_builder_get_object(builder, "save"));
     CHECK(save)
         retour = GTK_BUTTON(gtk_builder_get_object(builder, "return"));
@@ -865,6 +1013,11 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(bucket)
         rect =  GTK_BUTTON(gtk_builder_get_object(builder, "rectangle"));
     CHECK(rect)
+        losange =  GTK_BUTTON(gtk_builder_get_object(builder, "losange"));
+    CHECK(losange)
+        circle =  GTK_BUTTON(gtk_builder_get_object(builder, "circle"));
+    CHECK(circle)
+
         new = GTK_WIDGET(gtk_builder_get_object(builder, "new"));
     CHECK(new)
         //FILTERS
@@ -884,8 +1037,11 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(filter7)
 
 
-        hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
+    hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
     gtk_container_add(GTK_CONTAINER(grid), hscale);
+
+    hscale2 = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement2));
+    gtk_container_add(GTK_CONTAINER(grid2), hscale2);
 
     //g_signal_connect(G_OBJECT(drawarea), "draw",G_CALLBACK(on_draw_event), NULL); 
 
@@ -903,6 +1059,9 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(erase, "clicked", G_CALLBACK(erase_white), NULL);
     g_signal_connect(bucket, "clicked", G_CALLBACK(flood_fill), NULL);
     g_signal_connect(rect, "clicked", G_CALLBACK(get_rect), NULL);
+    g_signal_connect(losange, "clicked", G_CALLBACK(get_losange), NULL);
+    g_signal_connect(circle, "clicked", G_CALLBACK(get_circle), NULL);
+    g_signal_connect(triangle, "clicked", G_CALLBACK(get_triangle), NULL);
     g_signal_connect(drawarea, "button-press-event", G_CALLBACK(on_click), NULL); //blc
     g_signal_connect(drawarea, "motion-notify-event", G_CALLBACK(on_click), NULL); //important
     g_signal_connect(drawarea, "button-release-event", G_CALLBACK(on_click_release), NULL);
@@ -911,9 +1070,11 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(web, "activate", G_CALLBACK(website_button), NULL);
     g_signal_connect(save, "activate", G_CALLBACK(on_save),NULL);
     g_signal_connect(hscale, "value-changed", G_CALLBACK(value_changed), NULL);
+    g_signal_connect(hscale2, "value-changed", G_CALLBACK(value_changed2), NULL);
     g_signal_connect(retour, "clicked", G_CALLBACK(ctrl_z), NULL);
     g_signal_connect(annul, "clicked", G_CALLBACK(ctrl_y), NULL);
-    g_signal_connect(gtk_widget_get_toplevel (drawarea), "button-release-event", G_CALLBACK(refresh), NULL);
+    g_signal_connect(window, "motion-notify-event", G_CALLBACK(refresh), NULL);
+    //g_signal_connect(drawarea, "button-release-event", G_CALLBACK(refresh), NULL);
     g_signal_connect(gtk_widget_get_toplevel(menu), "button-release-event", G_CALLBACK(refresh), NULL);
  
     g_signal_connect(new, "activate", G_CALLBACK(loadblank), NULL);
@@ -957,6 +1118,7 @@ int main(int argc, char *argv[])
     int status= g_application_run(G_APPLICATION(app), argc, argv);
 
     g_object_unref(app);
+
 
     return status;
 }
