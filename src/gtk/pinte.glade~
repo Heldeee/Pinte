@@ -270,8 +270,14 @@
                     <child>
                       <object class="GtkColorButton" id="color1">
                         <property name="visible">True</property>
+<<<<<<< HEAD
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                        <property name="color">#000000000000</property>
+=======
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+>>>>>>> 7c206d1dd07638f1f09718120a79eb6a31512eac
                         <signal name="color-set" handler="on_color1_color_set" swapped="no"/>
                       </object>
                       <packing>
