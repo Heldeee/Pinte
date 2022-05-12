@@ -625,20 +625,26 @@ void draw_star(int size, GdkEventButton *event)
     int intey[5];
     for (int i = 0; i < 5; i++)
     {
-        extex[i] = size * cos(2*M_PI * i / 5 + M_PI/2) + x;
-        extey[i] = size* sin(2 * M_PI * i / 5 + M_PI/2) + y;
-        intex[i] = size * cos(2*M_PI * i / 5 + 2 * M_PI/10) +x;
-        intey[i] = size * sin(2*M_PI * i / 5 + 2 * M_PI/10) + y;
+        intex[i] = size / 3 * cos(2* M_PI * i / 5 + M_PI/2) + x;
+        intey[i] = size / 3 * sin(2 * M_PI * i / 5 + M_PI/2) + y;
+        extex[i] = size * cos(2*M_PI * i / 5 + 2 * M_PI/10 + M_PI/2) +x;
+        extey[i] = size * sin(2*M_PI * i / 5 + 2 * M_PI/10 + M_PI/2) + y;
     }
-    for (int i = 0; i < 4; i++)
+    for (int i = 1; i < 5; i++)
     {
-        cairo_move_to(cr, intex[i], intey[i]);
-        cairo_line_to(cr, extex[i], extey[i]);
+        cairo_move_to(cr, extex[i], extey[i]);
+        cairo_line_to(cr, intex[i], intey[i]);
         cairo_stroke(cr);
-        cairo_move_to(cr, intex[i + 1], intey[i + 1]);
-        cairo_line_to(cr, extex[i], extey[i]);
+        cairo_move_to(cr, extex[i - 1], extey[i -1]);
+        cairo_line_to(cr, intex[i], intey[i]);
         cairo_stroke(cr);
     }
+    cairo_move_to(cr, extex[0], extey[0]);
+    cairo_line_to(cr, intex[0], intey[0]);
+    cairo_stroke(cr);
+    cairo_move_to(cr, extex[4], extey[4]);
+    cairo_line_to(cr, intex[0], intey[0]);
+    cairo_stroke(cr);
 }
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
