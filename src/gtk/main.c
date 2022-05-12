@@ -1107,6 +1107,7 @@ GtkEntry *spin1;
 
 gboolean value_changed3(GtkWidget* widget)
 {
+    res_polygon = 0;
     int acc=1;
     const gchar* s= gtk_entry_get_text(spin1);
     size_t len = strlen(s);
@@ -1142,7 +1143,6 @@ gboolean value_changed3(GtkWidget* widget)
         return 0;
     }
 
-    printf("%i\n",res_polygon );
     return 0;
 }
 
