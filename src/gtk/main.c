@@ -339,8 +339,10 @@ size_t circled = 0;
 size_t bucketed = 0;
 size_t erased = 0;
 size_t stared = 0;
+size_t polygoned = 0;
 void return_draw()
 {
+    polygoned = 0;
     rectangled = 0;
     triangled = 0;
     bucketed = 0;
@@ -403,6 +405,7 @@ void on_color1_color_set(GtkColorButton *cb)
 
 void erase_white()
 {
+    polygoned = 0;
     rectangled = 0;
     bucketed = 0;
     erased = 1;
@@ -426,6 +429,7 @@ void value_changed2(GtkWidget *scale, gpointer user_data)
 
 void flood_fill()
 {
+    polygoned = 0;
     erased = 0;
     rectangled = 0;
     bucketed = 1;
@@ -438,6 +442,7 @@ void flood_fill()
 
 void get_rect()
 {
+    polygoned = 0;
     erased = 0;
     bucketed = 0;
     rectangled = 1;
@@ -450,6 +455,7 @@ void get_rect()
 
 void get_triangle()
 {
+    polygoned = 0;
     erased = 0;
     bucketed = 0;
     triangled = 1;
@@ -462,6 +468,7 @@ void get_triangle()
 
 void get_losange()
 {
+    polygoned = 0;
     erased = 0;
     bucketed = 0;
     triangled = 0;
@@ -472,7 +479,9 @@ void get_losange()
 }
 
 void get_circle()
-{   erased = 0;
+{   
+    polygoned = 0;
+    erased = 0;
     bucketed = 0;
     triangled = 0;
     rectangled = 0;
@@ -484,6 +493,7 @@ void get_circle()
 
 void get_pipette()
 {
+    polygoned = 0;
   rectangled = 0;
   bucketed = 0;
   erased = 0;
@@ -494,8 +504,23 @@ void get_pipette()
   stared = 0;
 }
 
+void get_polygon()
+{
+  rectangled = 0;
+  bucketed = 0;
+  erased = 0;
+  triangled = 0;
+  losanged = 0;
+  circled = 0;
+  pipetted = 0;
+  stared = 0;
+  polygoned = 1;
+}
+
 void get_star()
-{   erased = 0;
+{   
+    polygoned = 0;
+    erased = 0;
     bucketed = 0;
     triangled = 0;
     rectangled = 0;
@@ -647,6 +672,33 @@ void draw_star(int size, GdkEventButton *event)
     cairo_stroke(cr);
 }
 
+void draw_polygon(int size, int n, GdkEventButton *event)
+{
+    GdkEventMotion * e = (GdkEventMotion *) event;
+    int x= e->x;
+    int y = e->y;
+    cairo_t *cr = cairo_create(surface);
+    cairo_set_source_rgb(cr, red, green, blue);
+    cairo_set_line_width(cr, size1);
+    int intex[n];
+    int intey[n];
+    for (int i = 0; i < n; i++)
+    {
+        intex[i] = size * cos(2* M_PI * i / n + M_PI/2) + x;
+        intey[i] = size * sin(2 * M_PI * i / n + M_PI/2) + y;
+    }
+    for (int i = 0; i < n - 1; i++)
+    {
+        cairo_move_to(cr, intex[i], intey[i]);
+        cairo_line_to(cr, intex[i + 1], intey[i + 1]);
+        cairo_stroke(cr);
+
+    }
+    cairo_move_to(cr, intex[n - 1], intey[n - 1]);
+    cairo_line_to(cr, intex[0], intey[0]);
+    cairo_stroke(cr);
+}
+
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
     if (pipetted == 1)
@@ -667,6 +719,11 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
     {
         undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
         draw_rectangle(100 * size2, event);
+    }
+    else if (polygoned == 1)
+    {
+        undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+        draw_polygon(100 * size2,7, event);
     }
     else if (stared == 1)
     {
@@ -1036,6 +1093,7 @@ void create_window(GtkApplication *app, gpointer data)
     GtkButton *losange;
     GtkButton *circle;
     GtkButton *star;
+    GtkButton *polygon;
     GtkButton *pipette;
     GtkWidget *new;
     GtkWidget *menu;
@@ -1059,6 +1117,9 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(triangle)
     star = GTK_BUTTON(gtk_builder_get_object(builder, "star"));
     CHECK(star)
+
+    polygon = GTK_BUTTON(gtk_builder_get_object(builder, "polygon"));
+    CHECK(polygon)
         drawarea = GTK_WIDGET(gtk_builder_get_object(builder, "drawarea"));
     CHECK(drawarea)
         color1 = GTK_WIDGET(gtk_builder_get_object(builder, "color1"));
@@ -1165,6 +1226,7 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(losange, "clicked", G_CALLBACK(get_losange), NULL);
     g_signal_connect(circle, "clicked", G_CALLBACK(get_circle), NULL);
     g_signal_connect(star, "clicked", G_CALLBACK(get_star), NULL);
+    g_signal_connect(polygon, "clicked", G_CALLBACK(get_polygon), NULL);
     g_signal_connect(triangle, "clicked", G_CALLBACK(get_triangle), NULL);
     g_signal_connect(pipette, "clicked", G_CALLBACK(get_pipette), NULL);
     g_signal_connect(drawarea, "button-press-event", G_CALLBACK(on_click), NULL); //blc
