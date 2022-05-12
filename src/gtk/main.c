@@ -331,11 +331,11 @@ gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
 
 }
 
+size_t pipetted = 0;
 size_t rectangled = 0;
 size_t triangled = 0;
 size_t losanged = 0;
 size_t circled = 0;
-size_t cheat_bucket = 1;
 size_t bucketed = 0;
 size_t erased = 0;
 void return_draw()
@@ -344,6 +344,9 @@ void return_draw()
     triangled = 0;
     bucketed = 0;
     erased = 0;
+    pipetted = 0;
+    circled = 0;
+    losanged = 0;
     filename = NULL;
 }
 
@@ -404,6 +407,7 @@ void erase_white()
     triangled = 0;
     losanged = 0;
     circled = 0;
+    pipetted = 0;
 }
 
 void value_changed(GtkWidget *scale, gpointer user_data) {
@@ -425,6 +429,7 @@ void flood_fill()
     triangled = 0;
     losanged = 0;
     circled = 0;
+    pipetted = 0;
 }
 
 void get_rect()
@@ -435,6 +440,7 @@ void get_rect()
     triangled = 0;
     losanged = 0;
     circled = 0;
+    pipetted = 0;
 }
 
 void get_triangle()
@@ -445,6 +451,7 @@ void get_triangle()
     rectangled = 0;
     losanged = 0;
     circled = 0;
+    pipetted = 0;
 }
 
 void get_losange()
@@ -464,6 +471,18 @@ void get_circle()
     rectangled = 0;
     losanged = 0;
     circled = 1;
+    pipetted = 0;
+}
+
+void get_pipette()
+{
+  rectangled = 0;
+  bucketed = 0;
+  erased = 0;
+  triangled = 0;
+  losanged = 0;
+  circled = 0;
+  pipetted = 1;
 }
 
 //rectangle temporaire pour test le bucket
@@ -574,9 +593,21 @@ void draw_circle(int size, GdkEventButton *event)
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
+    if (pipetted == 1)
+      {	
+	rowstride = gdk_pixbuf_get_rowstride(surface_pixbuf);
+	n_channels = gdk_pixbuf_get_n_channels(surface_pixbuf);
+	pixels = gdk_pixbuf_get_pixels(surface_pixbuf);
+      
+	GdkEventMotion * e = (GdkEventMotion *) event;
+	struct Color *cur = getPixel(e->x,e->y);
+	red = (double)cur->red/255;
+	green = (double)cur->green/255;
+	blue = (double)cur->blue/255;
+	g_print("%f %f %f\n\n", red, green, blue);
+      }
 
-
-    if (rectangled == 1)
+    else if (rectangled == 1)
     {
         undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
         draw_rectangle(100 * size2, event);
@@ -650,7 +681,6 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
                 //cairo_fill_preserve(context);
 
             }
-
 
             mouseX= e->x;
             mouseY = e->y;
@@ -944,6 +974,7 @@ void create_window(GtkApplication *app, gpointer data)
     GtkButton *triangle;
     GtkButton *losange;
     GtkButton *circle;
+    GtkButton *pipette;
     GtkWidget *new;
     GtkWidget *menu;
     //FILTERS
@@ -998,6 +1029,8 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(losange)
         circle =  GTK_BUTTON(gtk_builder_get_object(builder, "circle"));
     CHECK(circle)
+        pipette =  GTK_BUTTON(gtk_builder_get_object(builder, "pipette"));
+    CHECK(pipette)
 
         new = GTK_WIDGET(gtk_builder_get_object(builder, "new"));
     CHECK(new)
@@ -1017,7 +1050,7 @@ void create_window(GtkApplication *app, gpointer data)
         filter7 = GTK_WIDGET(gtk_builder_get_object(builder, "filter7"));
     CHECK(filter7)
 
-
+      //ICON ON GLADE
     GtkWidget *imageBucket = gtk_image_new_from_file("icons/fill.png");
     gtk_button_set_image(bucket, imageBucket);
 
@@ -1038,6 +1071,10 @@ void create_window(GtkApplication *app, gpointer data)
 
     GtkWidget *imageLosange = gtk_image_new_from_file("icons/losange.png");
     gtk_button_set_image(losange, imageLosange);
+
+    GtkWidget *imagePipette = gtk_image_new_from_file("icons/pipette.png");
+    gtk_button_set_image(pipette, imagePipette);
+
     
     hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
     gtk_container_add(GTK_CONTAINER(grid), hscale);
@@ -1064,6 +1101,7 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(losange, "clicked", G_CALLBACK(get_losange), NULL);
     g_signal_connect(circle, "clicked", G_CALLBACK(get_circle), NULL);
     g_signal_connect(triangle, "clicked", G_CALLBACK(get_triangle), NULL);
+    g_signal_connect(pipette, "clicked", G_CALLBACK(get_pipette), NULL);
     g_signal_connect(drawarea, "button-press-event", G_CALLBACK(on_click), NULL); //blc
     g_signal_connect(drawarea, "motion-notify-event", G_CALLBACK(on_click), NULL); //important
     g_signal_connect(drawarea, "button-release-event", G_CALLBACK(on_click_release), NULL);
