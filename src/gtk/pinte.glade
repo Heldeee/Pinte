@@ -270,6 +270,7 @@
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <property name="color">#000000000000</property>
                         <signal name="color-set" handler="on_color1_color_set" swapped="no"/>
                       </object>
                       <packing>

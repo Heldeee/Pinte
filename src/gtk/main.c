@@ -142,6 +142,7 @@ double blue = 0;
 
 
 
+GtkWidget *color1;
 GtkButton *status;
 static struct Color pixel;
 static guchar *current;
@@ -213,7 +214,7 @@ gboolean check_pixel(gint x, gint y, struct Color *fgcolor, struct Color *bgcolo
 }
 
 void floodFill(gint x, gint y, struct Color *color, gint p_size){
-  struct Point *current_point;
+  struct Point *current_point = NULL;
   gint west, east, valid_north, valid_south;
   struct Color *base_color = getPixel(x,y);
   if(!check_pixel(x, y ,color, base_color, p_size, x, y)){
@@ -397,6 +398,7 @@ double mouseY;
 double previousX, previousY;
 int acc = 0;
 GdkRGBA couleur;
+
 
 void on_color1_color_set(GtkColorButton *cb)
 {
@@ -723,18 +725,27 @@ void draw_polygon(int size, int n, GdkEventButton *event)
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
+   
+    
     if (pipetted == 1)
       {	
-	rowstride = gdk_pixbuf_get_rowstride(surface_pixbuf);
-	n_channels = gdk_pixbuf_get_n_channels(surface_pixbuf);
-	pixels = gdk_pixbuf_get_pixels(surface_pixbuf);
+	        rowstride = gdk_pixbuf_get_rowstride(surface_pixbuf);
+	        n_channels = gdk_pixbuf_get_n_channels(surface_pixbuf);
+	        pixels = gdk_pixbuf_get_pixels(surface_pixbuf);
+
       
-	GdkEventMotion * e = (GdkEventMotion *) event;
-	struct Color *cur = getPixel(e->x,e->y);
-	red = (double)cur->red/255;
-	green = (double)cur->green/255;
-	blue = (double)cur->blue/255;
-	g_print("%f %f %f\n\n", red, green, blue);
+	        GdkEventMotion * e = (GdkEventMotion *) event;
+	        struct Color *cur = getPixel(e->x,e->y);
+	        red = (double)cur->red/255;
+	        green = (double)cur->green/255;
+	        blue = (double)cur->blue/255;
+            
+            couleur.red = red;
+            couleur.blue = blue;
+            couleur.green= green;
+            gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(color1), &couleur);
+
+	        //g_print("%f %f %f\n\n", red, green, blue);
       }
 
     else if (rectangled == 1)
@@ -1141,7 +1152,6 @@ void create_window(GtkApplication *app, gpointer data)
 
     GtkWidget *window;
     //GtkWidget *drawarea;
-    GtkWidget *color1;
     GtkWidget *load;
     GtkButton *pen;
     GtkButton *erase;
@@ -1313,6 +1323,7 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(polygon, "clicked", G_CALLBACK(get_polygon), NULL);
     g_signal_connect(triangle, "clicked", G_CALLBACK(get_triangle), NULL);
     g_signal_connect(pipette, "clicked", G_CALLBACK(get_pipette), NULL);
+
     g_signal_connect(drawarea, "button-press-event", G_CALLBACK(on_click), NULL); //blc
     g_signal_connect(drawarea, "motion-notify-event", G_CALLBACK(on_click), NULL); //important
     g_signal_connect(drawarea, "button-release-event", G_CALLBACK(on_click_release), NULL);
