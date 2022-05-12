@@ -213,7 +213,7 @@ gboolean check_pixel(gint x, gint y, struct Color *fgcolor, struct Color *bgcolo
 }
 
 void floodFill(gint x, gint y, struct Color *color, gint p_size){
-  struct Point *current_point;
+  struct Point *current_point = NULL;
   gint west, east, valid_north, valid_south;
   struct Color *base_color = getPixel(x,y);
   if(!check_pixel(x, y ,color, base_color, p_size, x, y)){
@@ -1284,6 +1284,11 @@ void create_window(GtkApplication *app, gpointer data)
      GtkWidget *imageStar = gtk_image_new_from_file("icons/star.png");
     gtk_button_set_image(star, imageStar);
 
+    GtkWidget *imageAnnul = gtk_image_new_from_file("icons/redo.png");
+    gtk_button_set_image(annul, imageAnnul);
+
+     GtkWidget *imageRetour = gtk_image_new_from_file("icons/undo.png");
+    gtk_button_set_image(retour, imageRetour);
     
     hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
     gtk_container_add(GTK_CONTAINER(grid), hscale);
