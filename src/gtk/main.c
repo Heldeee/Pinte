@@ -29,7 +29,7 @@ double start_click = 0;
 GtkWidget* window;
 GtkWidget* drawarea;
 
-
+int res_polygon =0;
 
 void savefile(GtkButton *button, gpointer user_data)
 {   
@@ -723,7 +723,7 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
     else if (polygoned == 1)
     {
         undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
-        draw_polygon(100 * size2,7, event);
+        draw_polygon(100 * size2,res_polygon, event);
     }
     else if (stared == 1)
     {
@@ -1068,6 +1068,48 @@ gboolean mirrorr(GtkWidget *widget)
     return TRUE;
 }
 
+GtkEntry *spin1;
+
+gboolean value_changed3(GtkWidget* widget)
+{
+    int acc=1;
+    const gchar* s= gtk_entry_get_text(spin1);
+    size_t len = strlen(s);
+    size_t i=0;
+    if (len==3)
+    {
+         i = 1;
+    }
+    else
+    {
+         i=0;
+    }
+    for (;len>i;len--)
+    {
+        if (s[len - 1] >='0' && s[len - 1] <= '9')
+        {
+            res_polygon += acc*(s[len - 1] - '0');
+            acc *=10;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    if (s[0]=='-')
+    {
+        return 0;;
+    }
+
+    if ( (s[0]!= '-') && (s[0] <'0' || s[0] > '9'))
+    {
+        return 0;
+    }
+
+    printf("%i\n",res_polygon );
+    return 0;
+}
 
 
 void create_window(GtkApplication *app, gpointer data)
@@ -1097,6 +1139,8 @@ void create_window(GtkApplication *app, gpointer data)
     GtkButton *pipette;
     GtkWidget *new;
     GtkWidget *menu;
+    //GtkEntry *spin1;
+    GtkButton *enter;
     //FILTERS
     GtkWidget *filter1;
     GtkWidget *filter2;
@@ -1120,6 +1164,10 @@ void create_window(GtkApplication *app, gpointer data)
 
     polygon = GTK_BUTTON(gtk_builder_get_object(builder, "polygon"));
     CHECK(polygon)
+    spin1=GTK_ENTRY(gtk_builder_get_object(builder,"spin1"));
+    CHECK(spin1)
+    enter=GTK_BUTTON(gtk_builder_get_object(builder,"enter"));
+    CHECK(enter)
         drawarea = GTK_WIDGET(gtk_builder_get_object(builder, "drawarea"));
     CHECK(drawarea)
         color1 = GTK_WIDGET(gtk_builder_get_object(builder, "color1"));
@@ -1244,6 +1292,8 @@ void create_window(GtkApplication *app, gpointer data)
     //g_signal_connect(drawarea, "button-release-event", G_CALLBACK(refresh), NULL);
     g_signal_connect(gtk_widget_get_toplevel(menu), "button-release-event", G_CALLBACK(refresh), NULL);
     
+    g_signal_connect(enter,"clicked",G_CALLBACK(value_changed3), NULL);
+
     g_signal_connect(new, "activate", G_CALLBACK(loadblank), NULL);
     //FILTERS
     g_signal_connect(filter1, "activate", G_CALLBACK(grey), NULL);
