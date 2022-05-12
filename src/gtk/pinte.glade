@@ -241,7 +241,7 @@
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
-              <!-- n-columns=1 n-rows=11 -->
+              <!-- n-columns=1 n-rows=13 -->
               <object class="GtkGrid">
                 <property name="width-request">100</property>
                 <property name="visible">True</property>
@@ -445,7 +445,7 @@
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
-                    <property name="top-attach">9</property>
+                    <property name="top-attach">11</property>
                   </packing>
                 </child>
                 <child>
@@ -570,7 +570,7 @@
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
-                    <property name="top-attach">8</property>
+                    <property name="top-attach">9</property>
                   </packing>
                 </child>
                 <child>
@@ -581,7 +581,7 @@
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
-                    <property name="top-attach">7</property>
+                    <property name="top-attach">8</property>
                   </packing>
                 </child>
                 <child>
@@ -597,7 +597,7 @@
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
-                    <property name="top-attach">6</property>
+                    <property name="top-attach">7</property>
                   </packing>
                 </child>
                 <child>
@@ -614,7 +614,7 @@
                       </object>
                       <packing>
                         <property name="left-attach">1</property>
-                        <property name="top-attach">0</property>
+                        <property name="top-attach">1</property>
                       </packing>
                     </child>
                     <child>
@@ -625,7 +625,7 @@
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
-                        <property name="top-attach">0</property>
+                        <property name="top-attach">1</property>
                       </packing>
                     </child>
                     <child>
@@ -636,7 +636,7 @@
                       </object>
                       <packing>
                         <property name="left-attach">0</property>
-                        <property name="top-attach">1</property>
+                        <property name="top-attach">2</property>
                       </packing>
                     </child>
                     <child>
@@ -645,12 +645,16 @@
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
                         <child>
-                          <placeholder/>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">label</property>
+                          </object>
                         </child>
                       </object>
                       <packing>
                         <property name="left-attach">1</property>
-                        <property name="top-attach">1</property>
+                        <property name="top-attach">2</property>
                       </packing>
                     </child>
                     <child>
@@ -668,6 +672,39 @@
                     <child>
                       <placeholder/>
                     </child>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">12</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Shapes' Size</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">9</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Width</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Size</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
