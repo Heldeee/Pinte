@@ -5,6 +5,9 @@
 #include "app_ds.h"
 #include "savepng.h"
 #include "../sdl/filter/filtre.h"
+#include "SDL/SDL_image.h"
+#include "SDL/SDL_rotozoom.h"
+    
 
 #define CHECK(pointer) \
     if(pointer == NULL) \
@@ -1103,6 +1106,50 @@ gboolean mirrorr(GtkWidget *widget)
     return TRUE;
 }
 
+gboolean rotaright(GtkWidget *widget)
+{
+    char* filename = ".temp_filter";
+    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+    init_sdl();
+    SDL_Surface *image = load_image(filename);
+
+    image = SDL_RotationCentralN(image, 90);
+
+    SDL_Surface *bmp = image;
+    SDL_SavePNG(bmp, filename);
+    SDL_FreeSurface(image);
+
+    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+    glob.image = cairo_image_surface_create_from_png(filename);
+    surface = glob.image;
+    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+
+    return TRUE;
+}
+
+gboolean rotaleft(GtkWidget *widget)
+{
+    char* filename = ".temp_filter";
+    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+    init_sdl();
+    SDL_Surface *image = load_image(filename);
+
+    image = SDL_RotationCentralN(image, -90);
+
+    SDL_Surface *bmp = image;
+    SDL_SavePNG(bmp, filename);
+    SDL_FreeSurface(image);
+
+    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+    glob.image = cairo_image_surface_create_from_png(filename);
+    surface = glob.image;
+    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+
+    return TRUE;
+}
+
 GtkEntry *spin1;
 
 gboolean value_changed3(GtkWidget* widget)
@@ -1183,6 +1230,8 @@ void create_window(GtkApplication *app, gpointer data)
     GtkWidget *filter5;
     GtkWidget *filter6;
     GtkWidget *filter7;
+    GtkButton *leftrot;
+    GtkButton *rightrot;
 
     GtkAdjustment* adjustement = gtk_adjustment_new(1.0,1.0,10.0,1.0,1.0, 0.0);
     GtkAdjustment* adjustement2 = gtk_adjustment_new(1.0,1.0,10.0,1.0,1.0, 0.0);
@@ -1212,6 +1261,11 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(load)
         erase = GTK_BUTTON(gtk_builder_get_object(builder, "erase"));
     CHECK(erase)
+    leftrot = GTK_BUTTON(gtk_builder_get_object(builder, "leftrot"));
+    CHECK(leftrot)
+    rightrot = GTK_BUTTON(gtk_builder_get_object(builder, "rightrot"));
+    CHECK(rightrot)
+
         web = GTK_WIDGET(gtk_builder_get_object(builder, "web"));
     CHECK(web)
         menu = GTK_WIDGET(gtk_builder_get_object(builder, "menu"));
@@ -1328,7 +1382,8 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(polygon, "clicked", G_CALLBACK(get_polygon), NULL);
     g_signal_connect(triangle, "clicked", G_CALLBACK(get_triangle), NULL);
     g_signal_connect(pipette, "clicked", G_CALLBACK(get_pipette), NULL);
-
+    g_signal_connect(rightrot, "clicked", G_CALLBACK(rotaright), NULL);
+    g_signal_connect(leftrot, "clicked", G_CALLBACK(rotaleft), NULL);
     g_signal_connect(drawarea, "button-press-event", G_CALLBACK(on_click), NULL); //blc
     g_signal_connect(drawarea, "motion-notify-event", G_CALLBACK(on_click), NULL); //important
     g_signal_connect(drawarea, "button-release-event", G_CALLBACK(on_click_release), NULL);

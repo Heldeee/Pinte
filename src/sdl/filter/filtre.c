@@ -345,7 +345,7 @@ int rotat(char path[])
   init_sdl();
   SDL_Surface *image = load_image(path);
       
-  image = SDL_RotationCentralN (image, 180);
+  image = SDL_RotationCentralN (image, 90);
       
   SDL_SaveBMP(image, result);
   SDL_FreeSurface(image);

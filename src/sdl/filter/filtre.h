@@ -29,8 +29,8 @@ int cyan(char path[]);
 void __blackandwhite(SDL_Surface *surf);
 int blackandwhite(char path[]);
 
-void __rotat(SDL_Surface *surf);
-int rotat(char path[]);
+SDL_Surface* SDL_RotationCentralN(SDL_Surface* origine, float angle);
+void rotat(char path[]);
 
 
 #endif
