@@ -142,7 +142,7 @@ double blue = 0;
 
 
 
-
+GtkButton *status;
 static struct Color pixel;
 static guchar *current;
 struct Queue *front;
@@ -340,8 +340,11 @@ size_t bucketed = 0;
 size_t erased = 0;
 size_t stared = 0;
 size_t polygoned = 0;
+
 void return_draw()
 {
+    GtkWidget *imageStatus = gtk_image_new_from_file("icons/pencil.png");
+    gtk_button_set_image(status, imageStatus);
     polygoned = 0;
     rectangled = 0;
     triangled = 0;
@@ -405,6 +408,8 @@ void on_color1_color_set(GtkColorButton *cb)
 
 void erase_white()
 {
+    GtkWidget *imageStatus = gtk_image_new_from_file("icons/eraser.png");
+    gtk_button_set_image(status, imageStatus);
     polygoned = 0;
     rectangled = 0;
     bucketed = 0;
@@ -429,6 +434,8 @@ void value_changed2(GtkWidget *scale, gpointer user_data)
 
 void flood_fill()
 {
+    GtkWidget *imageStatus = gtk_image_new_from_file("icons/fill.png");
+    gtk_button_set_image(status, imageStatus);
     polygoned = 0;
     erased = 0;
     rectangled = 0;
@@ -442,6 +449,8 @@ void flood_fill()
 
 void get_rect()
 {
+    GtkWidget *imageStatus = gtk_image_new_from_file("icons/rect.png");
+    gtk_button_set_image(status, imageStatus);
     polygoned = 0;
     erased = 0;
     bucketed = 0;
@@ -455,6 +464,8 @@ void get_rect()
 
 void get_triangle()
 {
+    GtkWidget *imageStatus = gtk_image_new_from_file("icons/triangle.png");
+    gtk_button_set_image(status, imageStatus);
     polygoned = 0;
     erased = 0;
     bucketed = 0;
@@ -468,6 +479,8 @@ void get_triangle()
 
 void get_losange()
 {
+    GtkWidget *imageStatus = gtk_image_new_from_file("icons/losange.png");
+    gtk_button_set_image(status, imageStatus);
     polygoned = 0;
     erased = 0;
     bucketed = 0;
@@ -480,6 +493,8 @@ void get_losange()
 
 void get_circle()
 {   
+    GtkWidget *imageStatus = gtk_image_new_from_file("icons/circle.png");
+    gtk_button_set_image(status, imageStatus);
     polygoned = 0;
     erased = 0;
     bucketed = 0;
@@ -493,6 +508,8 @@ void get_circle()
 
 void get_pipette()
 {
+    GtkWidget *imageStatus = gtk_image_new_from_file("icons/pipette.png");
+    gtk_button_set_image(status, imageStatus);
     polygoned = 0;
   rectangled = 0;
   bucketed = 0;
@@ -505,7 +522,9 @@ void get_pipette()
 }
 
 void get_polygon()
-{
+{   
+    GtkWidget *imageStatus = gtk_image_new_from_file("icons/polygon.png");
+    gtk_button_set_image(status, imageStatus);
   rectangled = 0;
   bucketed = 0;
   erased = 0;
@@ -519,6 +538,9 @@ void get_polygon()
 
 void get_star()
 {   
+    GtkWidget *imageStatus = gtk_image_new_from_file("icons/star.png");
+    gtk_button_set_image(status, imageStatus);
+
     polygoned = 0;
     erased = 0;
     bucketed = 0;
@@ -747,6 +769,8 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
     }
     else if (bucketed == 1)
     {
+        undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+
       GdkEventMotion * e = (GdkEventMotion *) event;
       mouseX= e->x;
       mouseY = e->y;
@@ -1182,6 +1206,9 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(web)
         menu = GTK_WIDGET(gtk_builder_get_object(builder, "menu"));
     CHECK(menu)
+    status = GTK_BUTTON(gtk_builder_get_object(builder, "status"));
+    CHECK(status)
+
 
         grid = GTK_PANED(gtk_builder_get_object(builder, "grid"));
     CHECK(grid)
@@ -1233,6 +1260,9 @@ void create_window(GtkApplication *app, gpointer data)
     GtkWidget *imageErase = gtk_image_new_from_file("icons/eraser.png");
     gtk_button_set_image(erase, imageErase);
 
+    GtkWidget *imageStatus = gtk_image_new_from_file("icons/pencil.png");
+    gtk_button_set_image(status, imageStatus);
+
     GtkWidget *imageRectangle = gtk_image_new_from_file("icons/rect.png");
     gtk_button_set_image(rect, imageRectangle);
 
@@ -1247,6 +1277,12 @@ void create_window(GtkApplication *app, gpointer data)
 
     GtkWidget *imagePipette = gtk_image_new_from_file("icons/pipette.png");
     gtk_button_set_image(pipette, imagePipette);
+
+    GtkWidget *imagePolygon = gtk_image_new_from_file("icons/polygon.png");
+    gtk_button_set_image(polygon, imagePolygon);
+
+     GtkWidget *imageStar = gtk_image_new_from_file("icons/star.png");
+    gtk_button_set_image(star, imageStar);
 
     
     hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
