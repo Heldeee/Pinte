@@ -338,6 +338,7 @@ size_t losanged = 0;
 size_t circled = 0;
 size_t bucketed = 0;
 size_t erased = 0;
+size_t stared = 0;
 void return_draw()
 {
     rectangled = 0;
@@ -347,6 +348,7 @@ void return_draw()
     pipetted = 0;
     circled = 0;
     losanged = 0;
+    stared = 0;
     filename = NULL;
 }
 
@@ -408,6 +410,7 @@ void erase_white()
     losanged = 0;
     circled = 0;
     pipetted = 0;
+    stared = 0;
 }
 
 void value_changed(GtkWidget *scale, gpointer user_data) {
@@ -430,6 +433,7 @@ void flood_fill()
     losanged = 0;
     circled = 0;
     pipetted = 0;
+    stared = 0;
 }
 
 void get_rect()
@@ -441,6 +445,7 @@ void get_rect()
     losanged = 0;
     circled = 0;
     pipetted = 0;
+    stared = 0;
 }
 
 void get_triangle()
@@ -452,6 +457,7 @@ void get_triangle()
     losanged = 0;
     circled = 0;
     pipetted = 0;
+    stared = 0;
 }
 
 void get_losange()
@@ -462,6 +468,7 @@ void get_losange()
     rectangled = 0;
     losanged = 1;
     circled = 0;
+    stared = 0;
 }
 
 void get_circle()
@@ -472,6 +479,7 @@ void get_circle()
     losanged = 0;
     circled = 1;
     pipetted = 0;
+    stared = 0;
 }
 
 void get_pipette()
@@ -483,6 +491,18 @@ void get_pipette()
   losanged = 0;
   circled = 0;
   pipetted = 1;
+  stared = 0;
+}
+
+void get_star()
+{   erased = 0;
+    bucketed = 0;
+    triangled = 0;
+    rectangled = 0;
+    losanged = 0;
+    circled = 0;
+    pipetted = 0;
+    stared = 1;
 }
 
 //rectangle temporaire pour test le bucket
@@ -591,6 +611,36 @@ void draw_circle(int size, GdkEventButton *event)
     cairo_stroke_preserve(cr);
 }
 
+void draw_star(int size, GdkEventButton *event)
+{
+    GdkEventMotion * e = (GdkEventMotion *) event;
+    int x= e->x;
+    int y = e->y;
+    cairo_t *cr = cairo_create(surface);
+    cairo_set_source_rgb(cr, red, green, blue);
+    cairo_set_line_width(cr, 5);
+    int extex[5];
+    int extey[5];
+    int intex[5];
+    int intey[5];
+    for (int i = 0; i < 5; i++)
+    {
+        extex[i] = size * cos(2*M_Pi * i / 5 + M_PI/2);
+        extey[i] = size* sin(2 * M_PI * i / 5 + M_PI/2);
+        intex[i] = size * cos(2*M_Pi * i / 5 + 2 * M_PI/10);
+        intey[i] = size * sin(2*M_Pi * i / 5 + 2 * M_PI/10);
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        cairo_move_to(cr, intex[i], intey[i]);
+        cairo_line_to(cr, extex[i], extex[i]);
+        cairo_stroke(cr);
+        cairo_move_to(cr, intex[i + 1], intey[i + 1]);
+        cairo_line_to(cr, extex[i], extex[i]);
+        cairo_stroke(cr);
+    }
+}
+
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
     if (pipetted == 1)
@@ -611,6 +661,11 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
     {
         undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
         draw_rectangle(100 * size2, event);
+    }
+    else if (stared == 1)
+    {
+        undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+        draw_star(100 * size2, event);
     }
     else if (triangled == 1)
     {
@@ -974,6 +1029,7 @@ void create_window(GtkApplication *app, gpointer data)
     GtkButton *triangle;
     GtkButton *losange;
     GtkButton *circle;
+    GtkButton *star;
     GtkButton *pipette;
     GtkWidget *new;
     GtkWidget *menu;
@@ -995,6 +1051,8 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(window)
     triangle = GTK_BUTTON(gtk_builder_get_object(builder, "triangle"));
     CHECK(triangle)
+    star = GTK_BUTTON(gtk_builder_get_object(builder, "star"));
+    CHECK(star)
         drawarea = GTK_WIDGET(gtk_builder_get_object(builder, "drawarea"));
     CHECK(drawarea)
         color1 = GTK_WIDGET(gtk_builder_get_object(builder, "color1"));
