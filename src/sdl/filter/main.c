@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
   rose(path);
   cyan(path);
   blackandwhite(path);
+  rotat(path);
   
   return 1;
 }
