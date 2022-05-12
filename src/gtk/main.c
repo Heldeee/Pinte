@@ -513,7 +513,7 @@ void draw_triangle(int size, GdkEventButton *event)
     int mousey = e->y;
     cairo_t *cr = cairo_create(surface);
     cairo_set_source_rgb(cr, red, green, blue);
-    cairo_set_line_width(cr, 5);
+    cairo_set_line_width(cr, size1);
     int a_x = mousex;
     int a_y = mousey;
     int b_x = mousex + size;
@@ -542,7 +542,7 @@ void draw_losange(int size, GdkEventButton *event)
     int mousey = e->y;
     cairo_t *cr = cairo_create(surface);
     cairo_set_source_rgb(cr, red, green, blue);
-    cairo_set_line_width(cr, 5);
+    cairo_set_line_width(cr, size1);
     int a_x = mousex;
     int a_y = mousey;
     int b_x = mousex + size;
@@ -578,7 +578,7 @@ void draw_rectangle(int size, GdkEventButton *event)
     int mousey = e->y;
     cairo_t *cr = cairo_create(surface);
     cairo_set_source_rgb(cr, red, green, blue);
-    cairo_set_line_width(cr, 5);
+    cairo_set_line_width(cr, size1);
     int left_x = mousex;
     int right_x = mousex + size;
     int top_y = mousey;
@@ -618,25 +618,25 @@ void draw_star(int size, GdkEventButton *event)
     int y = e->y;
     cairo_t *cr = cairo_create(surface);
     cairo_set_source_rgb(cr, red, green, blue);
-    cairo_set_line_width(cr, 5);
+    cairo_set_line_width(cr, size1);
     int extex[5];
     int extey[5];
     int intex[5];
     int intey[5];
     for (int i = 0; i < 5; i++)
     {
-        extex[i] = size * cos(2*M_Pi * i / 5 + M_PI/2);
-        extey[i] = size* sin(2 * M_PI * i / 5 + M_PI/2);
-        intex[i] = size * cos(2*M_Pi * i / 5 + 2 * M_PI/10);
-        intey[i] = size * sin(2*M_Pi * i / 5 + 2 * M_PI/10);
+        extex[i] = size * cos(2*M_PI * i / 5 + M_PI/2) + x;
+        extey[i] = size* sin(2 * M_PI * i / 5 + M_PI/2) + y;
+        intex[i] = size * cos(2*M_PI * i / 5 + 2 * M_PI/10) +x;
+        intey[i] = size * sin(2*M_PI * i / 5 + 2 * M_PI/10) + y;
     }
     for (int i = 0; i < 4; i++)
     {
         cairo_move_to(cr, intex[i], intey[i]);
-        cairo_line_to(cr, extex[i], extex[i]);
+        cairo_line_to(cr, extex[i], extey[i]);
         cairo_stroke(cr);
         cairo_move_to(cr, intex[i + 1], intey[i + 1]);
-        cairo_line_to(cr, extex[i], extex[i]);
+        cairo_line_to(cr, extex[i], extey[i]);
         cairo_stroke(cr);
     }
 }
@@ -1158,6 +1158,7 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(rect, "clicked", G_CALLBACK(get_rect), NULL);
     g_signal_connect(losange, "clicked", G_CALLBACK(get_losange), NULL);
     g_signal_connect(circle, "clicked", G_CALLBACK(get_circle), NULL);
+    g_signal_connect(star, "clicked", G_CALLBACK(get_star), NULL);
     g_signal_connect(triangle, "clicked", G_CALLBACK(get_triangle), NULL);
     g_signal_connect(pipette, "clicked", G_CALLBACK(get_pipette), NULL);
     g_signal_connect(drawarea, "button-press-event", G_CALLBACK(on_click), NULL); //blc
