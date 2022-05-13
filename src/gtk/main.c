@@ -729,7 +729,7 @@ void draw_polygon(int size, int n, GdkEventButton *event)
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
-   gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
+   //gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     
     if (pipetted == 1)
       {	
@@ -954,6 +954,24 @@ gboolean loadblank(GtkWidget* widget)
 gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     return TRUE;
 }
+
+gboolean loadgrid(GtkWidget* widget)
+{
+    while(!is_empty_stack(undo))
+    {
+        pop_stack(&undo);
+    }
+
+    undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+    glob.image = cairo_image_surface_create_from_png("grid");
+    surface = glob.image;
+    if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+        surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+
+gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
+    return TRUE;
+}
+
 
 gboolean grey(GtkWidget *widget)
 {
@@ -1227,6 +1245,7 @@ void create_window(GtkApplication *app, gpointer data)
     GtkButton *polygon;
     GtkButton *pipette;
     GtkWidget *new;
+    GtkWidget *newgrid;
     GtkWidget *menu;
     //GtkEntry *spin1;
     GtkButton *enter;
@@ -1267,6 +1286,9 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(color1)
         pen = GTK_BUTTON(gtk_builder_get_object(builder, "pen"));
     CHECK(pen)
+    newgrid = GTK_WIDGET(gtk_builder_get_object(builder, "newgrid"));
+    CHECK(pen)
+
         load = GTK_WIDGET(gtk_builder_get_object(builder, "load"));
     CHECK(load)
         erase = GTK_BUTTON(gtk_builder_get_object(builder, "erase"));
@@ -1413,6 +1435,7 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(enter,"clicked",G_CALLBACK(value_changed3), NULL);
 
     g_signal_connect(new, "activate", G_CALLBACK(loadblank), NULL);
+    g_signal_connect(newgrid, "activate", G_CALLBACK(loadgrid), NULL);
     //FILTERS
     g_signal_connect(filter1, "activate", G_CALLBACK(grey), NULL);
     g_signal_connect(filter2, "activate", G_CALLBACK(invert), NULL);
