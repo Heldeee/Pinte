@@ -1176,6 +1176,47 @@ gboolean rotaleft(GtkWidget *widget)
     return TRUE;
 }
 
+gboolean blank(GtkWidget *widget)
+{
+  g_print("enter");
+  char* filename = ".temp_filter";
+  gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+
+  undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+  glob.image = cairo_image_surface_create_from_png("./images/blanksheet.png");
+  surface = glob.image;
+  if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+    surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+  g_print("exit");
+  return TRUE;
+}
+
+gboolean quad(GtkWidget *widget)
+{
+  char* filename = ".temp_filter";
+  gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+
+  undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+  glob.image = cairo_image_surface_create_from_png("./images/quadrillage.png");
+  surface = glob.image;
+  if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+    surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+  return TRUE;
+}
+
+gboolean part(GtkWidget *widget)
+{
+  char* filename = ".temp_filter";
+  gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+
+  undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+  glob.image = cairo_image_surface_create_from_png("./images/partition.png");
+  surface = glob.image;
+  if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+    surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+  return TRUE;
+}
+
 GtkEntry *spin1;
 
 gboolean value_changed3(GtkWidget* widget)
@@ -1258,6 +1299,9 @@ void create_window(GtkApplication *app, gpointer data)
     GtkWidget *filter6;
     GtkWidget *filter7;
 
+    GtkButton *quadrillage;
+    GtkButton *blanksheet;
+    GtkButton *partition;
 
     GtkButton *leftrot;
     GtkButton *rightrot;
@@ -1346,6 +1390,12 @@ void create_window(GtkApplication *app, gpointer data)
         filter7 = GTK_WIDGET(gtk_builder_get_object(builder, "filter7"));
     CHECK(filter7)
 
+      quadrillage = GTK_BUTTON(gtk_builder_get_object(builder, "quadrillage"));
+    CHECK(quadrillage)
+      blanksheet = GTK_BUTTON(gtk_builder_get_object(builder, "blanksheet"));
+    CHECK(blanksheet)
+      partition = GTK_BUTTON(gtk_builder_get_object(builder, "partition"));
+    CHECK(partition)
 
       //ICON ON GLADE
     GtkWidget *imageBucket = gtk_image_new_from_file("icons/fill.png");
@@ -1386,6 +1436,15 @@ void create_window(GtkApplication *app, gpointer data)
 
      GtkWidget *imageRetour = gtk_image_new_from_file("icons/undo.png");
     gtk_button_set_image(retour, imageRetour);
+
+    GtkWidget *imageBlank = gtk_image_new_from_file("icons/blanksheet.png");
+    gtk_button_set_image(blanksheet, imageBlank);
+    
+    GtkWidget *imageQuad = gtk_image_new_from_file("icons/quadrillage.png");
+    gtk_button_set_image(quadrillage, imageQuad);
+
+    GtkWidget *imageMusic = gtk_image_new_from_file("icons/partition.png");
+    gtk_button_set_image(partition, imageMusic);
     
     hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
     gtk_container_add(GTK_CONTAINER(grid), hscale);
@@ -1445,7 +1504,9 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(filter6, "activate", G_CALLBACK(BAW), NULL);
     g_signal_connect(filter7, "activate", G_CALLBACK(mirrorr), NULL);
 
-  
+    g_signal_connect(quadrillage, "clicked", G_CALLBACK(quad), NULL);
+    g_signal_connect(blanksheet, "clicked", G_CALLBACK(blank), NULL);
+    g_signal_connect(partition, "clicked", G_CALLBACK(part), NULL);
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_widget_show_all(window);
