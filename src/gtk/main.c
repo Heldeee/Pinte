@@ -336,6 +336,7 @@ gboolean on_draw(GtkWidget *widget, cairo_t* context ,gpointer user_data)
 
 }
 
+size_t highlighted = 0;
 size_t pipetted = 0;
 size_t rectangled = 0;
 size_t triangled = 0;
@@ -359,6 +360,7 @@ void return_draw()
     circled = 0;
     losanged = 0;
     stared = 0;
+    highlighted = 0;
     filename = NULL;
 }
 
@@ -418,6 +420,7 @@ void erase_white()
     gtk_button_set_image(status, imageStatus);
     polygoned = 0;
     rectangled = 0;
+    highlighted = 0;
     bucketed = 0;
     erased = 1;
     triangled = 0;
@@ -445,6 +448,7 @@ void flood_fill()
     polygoned = 0;
     erased = 0;
     rectangled = 0;
+    highlighted = 0;
     bucketed = 1;
     triangled = 0;
     losanged = 0;
@@ -461,6 +465,7 @@ void get_rect()
     erased = 0;
     bucketed = 0;
     rectangled = 1;
+    highlighted = 0;
     triangled = 0;
     losanged = 0;
     circled = 0;
@@ -477,6 +482,7 @@ void get_triangle()
     bucketed = 0;
     triangled = 1;
     rectangled = 0;
+    highlighted = 0;
     losanged = 0;
     circled = 0;
     pipetted = 0;
@@ -493,6 +499,7 @@ void get_losange()
     triangled = 0;
     rectangled = 0;
     losanged = 1;
+    highlighted = 0;
     circled = 0;
     stared = 0;
 }
@@ -503,6 +510,7 @@ void get_circle()
     gtk_button_set_image(status, imageStatus);
     polygoned = 0;
     erased = 0;
+    highlighted = 0;
     bucketed = 0;
     triangled = 0;
     rectangled = 0;
@@ -519,6 +527,7 @@ void get_pipette()
     polygoned = 0;
   rectangled = 0;
   bucketed = 0;
+  highlighted = 0;
   erased = 0;
   triangled = 0;
   losanged = 0;
@@ -534,6 +543,7 @@ void get_polygon()
   rectangled = 0;
   bucketed = 0;
   erased = 0;
+  highlighted = 0;
   triangled = 0;
   losanged = 0;
   circled = 0;
@@ -551,6 +561,7 @@ void get_star()
     erased = 0;
     bucketed = 0;
     triangled = 0;
+    highlighted = 0;
     rectangled = 0;
     losanged = 0;
     circled = 0;
@@ -558,7 +569,24 @@ void get_star()
     stared = 1;
 }
 
-//rectangle temporaire pour test le bucket
+void get_highlight()
+{
+  highlighted = 1;
+
+  GtkWidget *imageStatus = gtk_image_new_from_file("icons/surligneur.png");
+  gtk_button_set_image(status, imageStatus);
+  rectangled = 0;
+  bucketed = 0;
+  erased = 0;
+  triangled = 0;
+  losanged = 0;
+  circled = 0;
+  pipetted = 0;
+  stared = 0;
+  polygoned = 0;
+}
+
+
 void draw_triangle(int size, GdkEventButton *event)
 {
     GdkEventMotion * e = (GdkEventMotion *) event;
@@ -730,8 +758,66 @@ void draw_polygon(int size, int n, GdkEventButton *event)
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
    //gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
-    
-    if (pipetted == 1)
+  if (highlighted == 1)
+    {
+      cairo_t *context = cairo_create(surface);
+
+        if(GDK_BUTTON_PRESS)
+        {
+            if (start_click == 1)
+            {
+                undo = push_stack(gdk_pixbuf_copy(surface_pixbuf), undo);
+                start_click = 0;
+            }
+            //printf("test\n");
+            cairo_set_line_width(context, size1);
+
+
+            if(acc != 0)
+            {
+                previousX = mouseX;
+                previousY = mouseY;
+                if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
+                    surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+                //surface_pixbuf = gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
+                //gdk_pixbuf_save (surface_pixbuf, "snapshot.png", "png", NULL, NULL);
+
+            }
+            GdkEventMotion * e = (GdkEventMotion *) event;
+            if (acc == 0)
+            {
+	      cairo_set_source_rgba(context, red, green, blue, 0.5);
+                previousX = e->x;
+                previousY = e->y;
+                //cairo_translate(context, size1/2, size1/2);
+                //cairo_arc(context, previousX, previousY, size1, 0, 2*M_PI);
+                cairo_rectangle(context, previousX, previousY, size1/40, size1/40);
+                //cairo_fill_preserve(context);
+
+            }
+
+            mouseX= e->x;
+            mouseY = e->y;
+
+
+            cairo_set_source_rgba(context, red, green, blue, 0.5);
+            cairo_move_to(context, previousX, previousY);
+            cairo_line_to(context, mouseX, mouseY);
+            cairo_stroke(context);
+            acc = 1;
+
+
+            cairo_destroy(context);
+
+            gtk_widget_queue_draw_area(widget, 0, 0,
+                    gtk_widget_get_allocated_width(widget),
+                    gtk_widget_get_allocated_height(widget));
+
+             gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
+            return TRUE;
+        }
+    }
+    else if (pipetted == 1)
       {	
 	        rowstride = gdk_pixbuf_get_rowstride(surface_pixbuf);
 	        n_channels = gdk_pixbuf_get_n_channels(surface_pixbuf);
@@ -1285,6 +1371,7 @@ void create_window(GtkApplication *app, gpointer data)
     GtkButton *star;
     GtkButton *polygon;
     GtkButton *pipette;
+    GtkButton *surligneur;
     GtkWidget *new;
     GtkWidget *newgrid;
     GtkWidget *menu;
@@ -1371,6 +1458,8 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(circle)
         pipette =  GTK_BUTTON(gtk_builder_get_object(builder, "pipette"));
     CHECK(pipette)
+      surligneur =  GTK_BUTTON(gtk_builder_get_object(builder, "surligneur"));
+    CHECK(surligneur)
 
         new = GTK_WIDGET(gtk_builder_get_object(builder, "new"));
     CHECK(new)
@@ -1445,6 +1534,9 @@ void create_window(GtkApplication *app, gpointer data)
 
     GtkWidget *imageMusic = gtk_image_new_from_file("icons/partition.png");
     gtk_button_set_image(partition, imageMusic);
+
+    GtkWidget *imageSurligneur = gtk_image_new_from_file("icons/surligneur.png");
+    gtk_button_set_image(surligneur, imageSurligneur);
     
     hscale = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustement));
     gtk_container_add(GTK_CONTAINER(grid), hscale);
@@ -1507,6 +1599,8 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(quadrillage, "clicked", G_CALLBACK(quad), NULL);
     g_signal_connect(blanksheet, "clicked", G_CALLBACK(blank), NULL);
     g_signal_connect(partition, "clicked", G_CALLBACK(part), NULL);
+
+    g_signal_connect(surligneur, "clicked", G_CALLBACK(get_highlight), NULL);
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_widget_show_all(window);
