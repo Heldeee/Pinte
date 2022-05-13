@@ -126,7 +126,7 @@ void openfile(GtkButton *button, gpointer user_data)
                 surface = glob.image;
 
                 surface_pixbuf = gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
+                gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
                 //gtk_window_set_default_size(GTK_WINDOW(window), cairo_image_surface_get_width (surface), cairo_image_surface_get_height (surface));
 
                 break;
@@ -175,6 +175,7 @@ void draw_pixel(gint x, gint y, struct Color *color, gint p_size, cairo_t *conte
       
     }
     else{
+        
       floodFill(x, y, color, p_size);
     }
   }
@@ -728,7 +729,7 @@ void draw_polygon(int size, int n, GdkEventButton *event)
 
 gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
-   
+   gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     
     if (pipetted == 1)
       {	
@@ -855,7 +856,7 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
                     gtk_widget_get_allocated_width(widget),
                     gtk_widget_get_allocated_height(widget));
 
-
+             gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
             return TRUE;
         }
     }
@@ -911,10 +912,11 @@ gboolean on_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
                     gtk_widget_get_allocated_width(widget),
                     gtk_widget_get_allocated_height(widget));
 
-
+             gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
             return TRUE;
         }
     }
+     gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     return FALSE;
 }
 
@@ -949,7 +951,7 @@ gboolean loadblank(GtkWidget* widget)
     if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
         surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
 
-
+gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     return TRUE;
 }
 
@@ -971,7 +973,7 @@ gboolean grey(GtkWidget *widget)
     surface = glob.image;
     if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
         surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
+gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     return TRUE;
 }
 
@@ -993,7 +995,7 @@ gboolean invert(GtkWidget *widget)
     surface = glob.image;
     if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
         surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
+gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     return TRUE;
 }
 
@@ -1015,7 +1017,7 @@ gboolean cyann(GtkWidget *widget)
     surface = glob.image;
     if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
         surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
+gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     return TRUE;
 }
 
@@ -1037,7 +1039,7 @@ gboolean rosee(GtkWidget *widget)
     surface = glob.image;
     if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
         surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
+gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     return TRUE;
 }
 gboolean yelloww(GtkWidget *widget)
@@ -1058,7 +1060,7 @@ gboolean yelloww(GtkWidget *widget)
     surface = glob.image;
     if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
         surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
+gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     return TRUE;
 }
 
@@ -1080,7 +1082,7 @@ gboolean BAW(GtkWidget *widget)
     surface = glob.image;
     if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
         surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
+gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     return TRUE;
 }
 
@@ -1102,20 +1104,22 @@ gboolean mirrorr(GtkWidget *widget)
     surface = glob.image;
     if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
         surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-
+    gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     return TRUE;
 }
 
 gboolean rotaright(GtkWidget *widget)
 {
     char* filename = ".temp_filter";
-    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+    //gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
     init_sdl();
-    SDL_Surface *image = load_image(filename);
-
-    image = SDL_RotationCentralN(image, 90);
-
-    SDL_Surface *bmp = image;
+    SDL_Surface *image = load_image("saveauto");
+      
+    image = __rotationr(image);
+        
+    SDL_SaveBMP(image, ".imgbmp");
+    
+    SDL_Surface *bmp = load_image(".imgbmp");
     SDL_SavePNG(bmp, filename);
     SDL_FreeSurface(image);
 
@@ -1125,19 +1129,22 @@ gboolean rotaright(GtkWidget *widget)
     if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
         surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
 
+    gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     return TRUE;
 }
 
 gboolean rotaleft(GtkWidget *widget)
 {
-    char* filename = ".temp_filter";
-    gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
+     char* filename = ".temp_filter";
+    //gdk_pixbuf_save (surface_pixbuf, filename, "png", NULL, NULL);
     init_sdl();
-    SDL_Surface *image = load_image(filename);
-
-    image = SDL_RotationCentralN(image, -90);
-
-    SDL_Surface *bmp = image;
+    SDL_Surface *image = load_image("saveauto");
+      
+    image = __rotationl(image);
+        
+    SDL_SaveBMP(image, ".imgbmp");
+    
+    SDL_Surface *bmp = load_image(".imgbmp");
     SDL_SavePNG(bmp, filename);
     SDL_FreeSurface(image);
 
@@ -1147,6 +1154,7 @@ gboolean rotaleft(GtkWidget *widget)
     if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
         surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
 
+    gdk_pixbuf_save (surface_pixbuf, "saveauto", "png", NULL, NULL);
     return TRUE;
 }
 
@@ -1230,6 +1238,8 @@ void create_window(GtkApplication *app, gpointer data)
     GtkWidget *filter5;
     GtkWidget *filter6;
     GtkWidget *filter7;
+
+
     GtkButton *leftrot;
     GtkButton *rightrot;
 
@@ -1313,6 +1323,7 @@ void create_window(GtkApplication *app, gpointer data)
     CHECK(filter6)
         filter7 = GTK_WIDGET(gtk_builder_get_object(builder, "filter7"));
     CHECK(filter7)
+
 
       //ICON ON GLADE
     GtkWidget *imageBucket = gtk_image_new_from_file("icons/fill.png");
@@ -1410,6 +1421,8 @@ void create_window(GtkApplication *app, gpointer data)
     g_signal_connect(filter5, "activate", G_CALLBACK(yelloww), NULL);
     g_signal_connect(filter6, "activate", G_CALLBACK(BAW), NULL);
     g_signal_connect(filter7, "activate", G_CALLBACK(mirrorr), NULL);
+
+  
 
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_widget_show_all(window);

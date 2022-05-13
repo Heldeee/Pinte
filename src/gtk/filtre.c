@@ -352,3 +352,107 @@ int rotat(char path[])
     
   return 0;
 }
+
+SDL_Surface *__rotationr(SDL_Surface *surf)
+{
+
+    int height = surf -> h;
+    int width = surf -> w;
+
+    SDL_Surface* surf2= SDL_CreateRGBSurface(0,height,width,32,0,0,0,0);
+
+    if (surf2 == NULL) {
+        
+        exit(1);
+    }
+
+     for (int i = 0; i < height; i++)
+      {
+        for (int j = 0; j < width; j++)
+      {
+       
+    
+
+	    Uint32 pixel = get_pixel(surf, j, i);
+      Uint8 r, g, b;
+      SDL_GetRGB(pixel, surf->format, &r, &g, &b);
+            
+	    Uint32 new_pixel;
+	    
+      new_pixel = SDL_MapRGB(surf2->format, r, g, b);
+  
+      put_pixel(surf2, height-i-1, j, new_pixel);
+	  
+    }
+  }
+
+  return surf2;
+    
+}
+
+int rotationr(char path[])
+{
+  char result[] = "./Results/rotationr.bmp";
+  
+  init_sdl();
+  SDL_Surface *image = load_image(path);
+      
+  image = __rotationr(image);
+      
+  SDL_SaveBMP(image, result);
+  SDL_FreeSurface(image);
+    
+  return 0;
+}
+
+SDL_Surface *__rotationl(SDL_Surface *surf)
+{
+
+    int height = surf -> h;
+    int width = surf -> w;
+
+    SDL_Surface* surf2= SDL_CreateRGBSurface(0,height,width,32,0,0,0,0);
+
+    if (surf2 == NULL) {
+        
+        exit(1);
+    }
+
+     for (int i = 0; i < height; i++)
+      {
+        for (int j = 0; j < width; j++)
+      {
+       
+    
+
+	    Uint32 pixel = get_pixel(surf, j, i);
+      Uint8 r, g, b;
+      SDL_GetRGB(pixel, surf->format, &r, &g, &b);
+            
+	    Uint32 new_pixel;
+	    
+      new_pixel = SDL_MapRGB(surf2->format, r, g, b);
+  
+      put_pixel(surf2, i, width-j-1, new_pixel);
+	  
+    }
+  }
+
+  return surf2;
+    
+}
+
+int rotationl(char path[])
+{
+  char result[] = "./Results/rotationl.bmp";
+  
+  init_sdl();
+  SDL_Surface *image = load_image(path);
+      
+  image = __rotationl(image);
+      
+  SDL_SaveBMP(image, result);
+  SDL_FreeSurface(image);
+    
+  return 0;
+}
