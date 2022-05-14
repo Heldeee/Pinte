@@ -1198,7 +1198,6 @@ gboolean blank(GtkWidget *widget)
     surface = glob.image;
     if (cairo_image_surface_get_width (surface)!= 0 && cairo_image_surface_get_height(surface)!=0)
         surface_pixbuf =  gdk_pixbuf_get_from_surface(surface,0,0,cairo_image_surface_get_width (surface),cairo_image_surface_get_height(surface));
-    g_print("exit");
     return TRUE;
 }
 
